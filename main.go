@@ -465,6 +465,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.folderInbox = tui.NewFolderInbox(cachedFolders, m.config.Accounts)
 		m.folderInbox.SetDateFormat(m.config.GetDateFormat())
+		m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
 		// Use cached INBOX emails for instant display (memory first, then disk)
 		if cached, ok := m.folderEmails["INBOX"]; ok && len(cached) > 0 {
 			m.folderInbox.SetEmails(cached, m.config.Accounts)
@@ -1019,6 +1020,9 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err := m.service.ReloadConfig(); err != nil {
 				log.Printf("config reload: %v", err)
 			}
+		}
+		if m.folderInbox != nil {
+			m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
 		}
 		return m, nil
 
@@ -2283,14 +2287,16 @@ func emailsToCache(emails []fetcher.Email) []config.CachedEmail {
 	var cached []config.CachedEmail
 	for _, email := range emails {
 		cached = append(cached, config.CachedEmail{
-			UID:       email.UID,
-			From:      email.From,
-			To:        email.To,
-			Subject:   email.Subject,
-			Date:      email.Date,
-			MessageID: email.MessageID,
-			AccountID: email.AccountID,
-			IsRead:    email.IsRead,
+			UID:        email.UID,
+			From:       email.From,
+			To:         email.To,
+			Subject:    email.Subject,
+			Date:       email.Date,
+			MessageID:  email.MessageID,
+			InReplyTo:  email.InReplyTo,
+			References: email.References,
+			AccountID:  email.AccountID,
+			IsRead:     email.IsRead,
 		})
 	}
 	return cached
@@ -2300,14 +2306,16 @@ func cacheToEmails(cached []config.CachedEmail) []fetcher.Email {
 	var emails []fetcher.Email
 	for _, c := range cached {
 		emails = append(emails, fetcher.Email{
-			UID:       c.UID,
-			From:      c.From,
-			To:        c.To,
-			Subject:   c.Subject,
-			Date:      c.Date,
-			MessageID: c.MessageID,
-			AccountID: c.AccountID,
-			IsRead:    c.IsRead,
+			UID:        c.UID,
+			From:       c.From,
+			To:         c.To,
+			Subject:    c.Subject,
+			Date:       c.Date,
+			MessageID:  c.MessageID,
+			InReplyTo:  c.InReplyTo,
+			References: c.References,
+			AccountID:  c.AccountID,
+			IsRead:     c.IsRead,
 		})
 	}
 	return emails
@@ -2335,14 +2343,16 @@ func saveEmailsToCache(emails []fetcher.Email) {
 	var cachedEmails []config.CachedEmail
 	for _, email := range emails {
 		cachedEmails = append(cachedEmails, config.CachedEmail{
-			UID:       email.UID,
-			From:      email.From,
-			To:        email.To,
-			Subject:   email.Subject,
-			Date:      email.Date,
-			MessageID: email.MessageID,
-			AccountID: email.AccountID,
-			IsRead:    email.IsRead,
+			UID:        email.UID,
+			From:       email.From,
+			To:         email.To,
+			Subject:    email.Subject,
+			Date:       email.Date,
+			MessageID:  email.MessageID,
+			InReplyTo:  email.InReplyTo,
+			References: email.References,
+			AccountID:  email.AccountID,
+			IsRead:     email.IsRead,
 		})
 
 		// Save sender as a contact

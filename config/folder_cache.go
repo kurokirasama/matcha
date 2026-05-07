@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/floatpane/matcha/internal/threading"
 )
 
 // CachedFolders stores folder names for a single account.
@@ -17,8 +20,9 @@ type CachedFolders struct {
 
 // FolderCache stores cached folders for all accounts.
 type FolderCache struct {
-	Accounts  []CachedFolders `json:"accounts"`
-	UpdatedAt time.Time       `json:"updated_at"`
+	Accounts        []CachedFolders `json:"accounts"`
+	ThreadedFolders map[string]bool `json:"threaded_folders,omitempty"`
+	UpdatedAt       time.Time       `json:"updated_at"`
 }
 
 // folderCacheFile returns the full path to the folder cache file.
@@ -178,4 +182,60 @@ func LoadFolderEmailCache(folderName string) ([]CachedEmail, error) {
 		return nil, err
 	}
 	return cache.Emails, nil
+}
+
+func LoadFolderEmailHeaders(folderName string) ([]threading.EmailHeader, error) {
+	emails, err := LoadFolderEmailCache(folderName)
+	if err != nil {
+		return nil, err
+	}
+	headers := make([]threading.EmailHeader, 0, len(emails))
+	for _, email := range emails {
+		headers = append(headers, threading.EmailHeader{
+			ID:         email.MessageID,
+			InReplyTo:  email.InReplyTo,
+			References: email.References,
+			Subject:    email.Subject,
+			Date:       email.Date,
+			EmailID:    cachedEmailID(email),
+			Sender:     email.From,
+		})
+	}
+	return headers, nil
+}
+
+// IsFolderThreaded returns the threading state for a folder. If the user has
+// explicitly toggled threading for this folder, that override is returned.
+// Otherwise defaultEnabled (from Config.EnableThreaded) is used.
+func IsFolderThreaded(folderName string, defaultEnabled bool) bool {
+	cache, err := LoadFolderCache()
+	if err != nil || cache.ThreadedFolders == nil {
+		return defaultEnabled
+	}
+	v, ok := cache.ThreadedFolders[folderName]
+	if !ok {
+		return defaultEnabled
+	}
+	return v
+}
+
+// SetFolderThreaded stores an explicit per-folder threading override.
+func SetFolderThreaded(folderName string, threaded bool) error {
+	cache, err := LoadFolderCache()
+	if err != nil {
+		cache = &FolderCache{}
+	}
+	if cache.ThreadedFolders == nil {
+		cache.ThreadedFolders = make(map[string]bool)
+	}
+	cache.ThreadedFolders[folderName] = threaded
+	return SaveFolderCache(cache)
+}
+
+func cachedEmailID(email CachedEmail) string {
+	return email.AccountID + ":" + formatUID(email.UID)
+}
+
+func formatUID(uid uint32) string {
+	return strconv.FormatUint(uint64(uid), 10)
 }

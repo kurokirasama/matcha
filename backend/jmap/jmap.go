@@ -165,7 +165,11 @@ func (p *Provider) FetchEmails(_ context.Context, folder string, limit, offset u
 			Name:     "Email/query",
 			Path:     "/ids",
 		},
-		Properties: []string{"id", "subject", "from", "to", "replyTo", "receivedAt", "preview", "keywords", "mailboxIds", "hasAttachment", "messageId"},
+		Properties: []string{
+			"id", "subject", "from", "to", "replyTo", "receivedAt",
+			"preview", "keywords", "mailboxIds", "hasAttachment",
+			"messageId", "inReplyTo", "references",
+		},
 	})
 
 	resp, err := p.client.Do(req)
@@ -697,6 +701,10 @@ func jmapEmailToBackend(eml *email.Email, uid uint32, accountID string) backend.
 	if len(eml.MessageID) > 0 {
 		e.MessageID = eml.MessageID[0]
 	}
+	if len(eml.InReplyTo) > 0 {
+		e.InReplyTo = eml.InReplyTo[0]
+	}
+	e.References = append(e.References, eml.References...)
 	return e
 }
 
