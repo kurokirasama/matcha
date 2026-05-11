@@ -101,7 +101,8 @@ type mainModel struct {
 	idleWatcher *fetcher.IdleWatcher
 	idleUpdates chan fetcher.IdleUpdate
 	// Multi-protocol backend providers (keyed by account ID)
-	providers map[string]backend.Provider
+	providers   map[string]backend.Provider
+	providersMu sync.RWMutex
 	// Daemon client service (daemon or direct fallback)
 	service daemonclient.Service
 	// Plugin prompt waiting for user input
@@ -155,15 +156,23 @@ func (m *mainModel) ensureProviders() {
 		return
 	}
 	for _, acct := range m.config.Accounts {
-		if _, ok := m.providers[acct.ID]; ok {
+		m.providersMu.RLock()
+		_, ok := m.providers[acct.ID]
+		m.providersMu.RUnlock()
+
+		if ok {
 			continue
 		}
+
 		p, err := backend.New(&acct)
 		if err != nil {
 			log.Printf("backend: failed to create provider for %s: %v", acct.Email, err)
 			continue
 		}
+
+		m.providersMu.Lock()
 		m.providers[acct.ID] = p
+		m.providersMu.Unlock()
 	}
 }
 
@@ -172,7 +181,12 @@ func (m *mainModel) getProvider(acct *config.Account) backend.Provider {
 	if acct == nil {
 		return nil
 	}
-	return m.providers[acct.ID]
+
+	m.providersMu.RLock()
+	p := m.providers[acct.ID]
+	m.providersMu.RUnlock()
+
+	return p
 }
 
 func (m *mainModel) Init() tea.Cmd {
