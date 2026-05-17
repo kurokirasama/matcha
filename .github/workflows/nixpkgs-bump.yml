@@ -29,6 +29,11 @@ jobs:
           extra_nix_config: |
             experimental-features = nix-command flakes
 
+      - name: Checkout matcha (source of truth for package.nix)
+        uses: actions/checkout@v6
+        with:
+          path: matcha
+
       - name: Checkout nixpkgs fork
         uses: actions/checkout@v6
         with:
@@ -63,12 +68,16 @@ jobs:
           git checkout -b "$BRANCH"
           echo "BRANCH=$BRANCH" >> $GITHUB_ENV
 
-      - name: Bump version and reset hashes
+      - name: Sync package.nix from matcha repo and bump version
         working-directory: nixpkgs
         run: |
           PKG=pkgs/by-name/ma/matcha/package.nix
           NEW="${{ inputs.version }}"
+          # Overwrite nixpkgs package.nix with matcha repo's template.
+          # Template is source of truth; nixpkgs PR mirrors it.
+          cp ../matcha/nix/nixpkgs-package.nix "$PKG"
           sed -i -E "s/(version\s*=\s*\")[^\"]+(\")/\1$NEW\2/" "$PKG"
+          # Hashes already fakeHash in template; explicit reset for safety.
           sed -i -E 's|hash = "sha256-[A-Za-z0-9+/=]+"|hash = lib.fakeHash|' "$PKG"
           sed -i -E 's|vendorHash = "sha256-[A-Za-z0-9+/=]+"|vendorHash = lib.fakeHash|' "$PKG"
 
@@ -125,7 +134,7 @@ jobs:
 
           - Built on \`x86_64-linux\` via GitHub Actions
           - Hashes regenerated from upstream tarball
-          - No package metadata changes beyond version + hashes
+          - \`package.nix\` synced from upstream matcha repo (\`nix/nixpkgs-package.nix\`)
 
           cc maintainer for review.
           EOF
