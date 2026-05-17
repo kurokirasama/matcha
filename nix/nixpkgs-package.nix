@@ -2,6 +2,7 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  go,
   pkg-config,
   pcsclite,
   stdenv,
@@ -25,6 +26,12 @@ buildGoModule (finalAttrs: {
 
   vendorHash = lib.fakeHash;
   proxyVendor = true;
+
+  # Upstream pins `toolchain` to latest Go for dev builds (GOTOOLCHAIN=auto).
+  # Nix sandbox sets GOTOOLCHAIN=local and can't download — rewrite to nixpkgs Go.
+  postPatch = ''
+    sed -i -E "s/^toolchain go[0-9.]+$/toolchain go${go.version}/" go.mod
+  '';
 
   nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [
     pkg-config
