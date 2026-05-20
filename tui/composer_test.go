@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	tea "charm.land/bubbletea/v2"
@@ -36,6 +37,193 @@ func TestMailingListSuggestionTruncates(t *testing.T) {
 	expected := fmt.Sprintf("%s <%s>", singleAddress.Name, singleAddress.Email)
 	if singleDisplay != expected {
 		t.Fatalf("Expected single-address suggestion to stay untruncated, got %q", singleDisplay)
+	}
+}
+
+func TestNormalizeEmailList(t *testing.T) {
+	got, ok := normalizeEmailList("Alice Example <alice@example.com>, bob@example.com")
+	if !ok {
+		t.Fatal("Expected valid email list")
+	}
+	if want := "alice@example.com, bob@example.com"; got != want {
+		t.Fatalf("normalizeEmailList() = %q, want %q", got, want)
+	}
+
+	if _, ok := normalizeEmailList("not-an-email"); ok {
+		t.Fatal("Expected invalid email list")
+	}
+}
+
+func TestComposerEmailValidationOnFieldBlur(t *testing.T) {
+	composer := NewComposer("", "", "", "", false)
+	composer.toInput.SetValue("not-an-email")
+
+	model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	composer = model.(*Composer)
+
+	if composer.toError == "" {
+		t.Fatal("Expected To validation error after leaving invalid field")
+	}
+	if !strings.Contains(fmt.Sprint(composer.View()), composer.toError) {
+		t.Fatal("Expected validation error to be rendered below To field")
+	}
+}
+
+func TestComposerFromValidationOnFieldBlur(t *testing.T) {
+	tests := []struct {
+		name      string
+		from      string
+		wantError bool
+	}{
+		{
+			name:      "invalid from",
+			from:      "not-an-email",
+			wantError: true,
+		},
+		{
+			name: "bare address",
+			from: "user@example.org",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			accounts := []config.Account{
+				{ID: "account-1", Email: "user@example.org", CatchAll: true},
+			}
+			composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+			composer.focusIndex = focusFrom
+			composer.fromInput.Focus()
+			composer.fromInput.SetValue(tt.from)
+
+			model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+			composer = model.(*Composer)
+
+			if tt.wantError {
+				if composer.fromError == "" {
+					t.Fatal("Expected From validation error after leaving invalid catch-all From field")
+				}
+				if !strings.Contains(fmt.Sprint(composer.View()), composer.fromError) {
+					t.Fatal("Expected From validation error to be rendered below From field")
+				}
+				return
+			}
+			if composer.fromError != "" {
+				t.Fatalf("Expected From address to be valid, got %q", composer.fromError)
+			}
+		})
+	}
+}
+
+func TestComposerEmailValidationClearsWhenTyping(t *testing.T) {
+	composer := NewComposer("", "", "", "", false)
+	composer.toInput.SetValue("not-an-email")
+
+	model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyTab})
+	composer = model.(*Composer)
+	if composer.toError == "" {
+		t.Fatal("Expected To validation error after leaving invalid field")
+	}
+
+	composer.focusIndex = focusTo
+	composer.toInput.Focus()
+	model, _ = composer.Update(tea.KeyPressMsg{Code: 'x', Text: "x"})
+	composer = model.(*Composer)
+
+	if composer.toError != "" {
+		t.Fatalf("Expected To validation error to clear when typing, got %q", composer.toError)
+	}
+}
+
+func TestComposerSendValidatesEmailFields(t *testing.T) {
+	tests := []struct {
+		name          string
+		to            string
+		cc            string
+		catchAllFrom  string
+		wantCcError   bool
+		wantFromError bool
+	}{
+		{
+			name:        "invalid cc",
+			to:          "recipient@example.com",
+			cc:          "not-an-email",
+			wantCcError: true,
+		},
+		{
+			name:          "invalid catch-all from",
+			to:            "recipient@example.com",
+			catchAllFrom:  "not-an-email",
+			wantFromError: true,
+		},
+		{
+			name: "no recipients",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var composer *Composer
+			if tt.catchAllFrom != "" {
+				accounts := []config.Account{
+					{ID: "account-1", Email: "user@example.org", CatchAll: true},
+				}
+				composer = NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+				composer.fromInput.SetValue(tt.catchAllFrom)
+			} else {
+				composer = NewComposer("", "", "", "", false)
+			}
+			composer.toInput.SetValue(tt.to)
+			composer.ccInput.SetValue(tt.cc)
+			composer.subjectInput.SetValue("Test Subject")
+			composer.bodyInput.SetValue("This is the body.")
+			composer.focusIndex = focusSend
+
+			model, cmd := composer.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+			composer = model.(*Composer)
+
+			if cmd == nil {
+				t.Fatal("Expected auto-close command for composer notice")
+			}
+			if !composer.showNotice {
+				t.Fatal("Expected composer notice to be shown after send attempt")
+			}
+			if tt.wantCcError && composer.ccError == "" {
+				t.Fatal("Expected Cc validation error after send attempt")
+			}
+			if tt.wantFromError && composer.fromError == "" {
+				t.Fatal("Expected From validation error after send attempt")
+			}
+
+			model, _ = composer.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+			composer = model.(*Composer)
+
+			if composer.showNotice {
+				t.Fatal("Expected composer notice to close on Enter")
+			}
+			if tt.wantCcError && !strings.Contains(fmt.Sprint(composer.View()), composer.ccError) {
+				t.Fatal("Expected Cc validation error to be rendered after closing notice")
+			}
+			if tt.wantFromError && !strings.Contains(fmt.Sprint(composer.View()), composer.fromError) {
+				t.Fatal("Expected From validation error to be rendered after closing notice")
+			}
+		})
+	}
+}
+
+func TestComposerContactSuggestionUsesDisplayName(t *testing.T) {
+	composer := NewComposer("", "", "", "", false)
+	composer.showSuggestions = true
+	composer.suggestions = []config.Contact{{
+		Name:  "Alice Example",
+		Email: "alice@example.com",
+	}}
+
+	model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyEnter})
+	composer = model.(*Composer)
+
+	if got, want := composer.toInput.Value(), "Alice Example <alice@example.com>, "; got != want {
+		t.Fatalf("Expected suggestion to insert display-name address, got %q, want %q", got, want)
 	}
 }
 
