@@ -208,13 +208,13 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Route input to preview pane when focused
 		if m.previewPane != nil && m.focusedPane == FocusPreview {
 			s := msg.String()
-			if s != kb.Folder.FocusInbox && s != kb.Folder.FocusPreview && s != kb.Global.Cancel && s != "q" {
+			if s != kb.Folder.FocusInbox && s != kb.Folder.FocusPreview && s != kb.Global.Cancel && s != "q" &&
+				s != kb.Inbox.ToggleSidebar {
 				var cmd tea.Cmd
 				_, cmd = m.previewPane.Update(msg)
 				return m, cmd
 			}
 		}
-
 		switch msg.String() {
 		case kb.Folder.FocusPreview:
 			// Switch focus to preview pane
