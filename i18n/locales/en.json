@@ -53,6 +53,7 @@
       "empty": "No emails",
       "loading": "Loading emails...",
       "refreshing": "Refreshing...",
+      "compose": "compose",
       "visual_mode": "visual mode",
       "delete": "delete",
       "archive": "archive",

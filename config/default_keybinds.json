@@ -10,6 +10,7 @@
     "toggle_threaded": "T",
     "toggle_read": "u",
     "toggle_sidebar": "F",
+    "compose": "c",
     "delete": "d",
     "archive": "a",
     "refresh": "r",
