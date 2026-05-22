@@ -2,7 +2,7 @@
 
 ## Phase 1: Configuration
 - [x] Task: Add `Compose` to `InboxKeys` in `config/keybinds.go`. d7bb401
-- [~] Task: Add default `c` mapping in `config/default_keybinds.json`.
+- [x] Task: Add default `c` mapping in `config/default_keybinds.json`. 60810fb
 - [ ] Task: Conductor - User Manual Verification 'Config' (Protocol in workflow.md)
 
 ## Phase 2: TUI Implementation
