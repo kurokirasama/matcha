@@ -8,6 +8,7 @@
   "inbox": {
     "visual_mode": "v",
     "toggle_threaded": "T",
+    "toggle_read": "u",
     "delete": "d",
     "archive": "a",
     "refresh": "r",
@@ -20,6 +21,7 @@
   "email": {
     "reply": "r",
     "forward": "f",
+    "toggle_read": "u",
     "delete": "d",
     "archive": "a",
     "toggle_images": "i",
