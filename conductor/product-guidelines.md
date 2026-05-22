@@ -13,3 +13,6 @@
 
 **Error Handling**
 *   **Concise & Unobtrusive:** Errors should be presented briefly and clearly, avoiding clutter in the main interface. Use a dedicated status line or subtle toast notifications for error reporting, and only interrupt the workflow for critical failures that require immediate user action.
+
+**Communication & Reporting**
+*   **Mandatory Discord Alerts:** For asynchronous agent operations, all requests for user input or reports for long-running tasks (>5min) MUST be preceded by a Discord notification. This ensures the user is alerted to blocking events in real-time.

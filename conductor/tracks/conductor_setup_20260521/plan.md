@@ -7,9 +7,9 @@
 - [x] Task: Conductor - User Manual Verification 'Memory Retrieval & Discovery' (Protocol in workflow.md)
 
 ## Phase 2: Core File Creation / Update
-- [ ] Task: Create or update core files in the `conductor/` directory (`product.md`, `tech-stack.md`, `workflow.md`, `product-guidelines.md`, `tracks.md`, `index.md`).
-- [ ] Task: Propose necessary updates to align with new protocols (Nushell-first, Context Workflow, Discord notifications, autonomous verification, `git-sync` after archiving).
-- [ ] Task: Conductor - User Manual Verification 'Core File Creation / Update' (Protocol in workflow.md)
+- [x] Task: Create or update core files in the `conductor/` directory (`product.md`, `tech-stack.md`, `workflow.md`, `product-guidelines.md`, `tracks.md`, `index.md`).
+- [x] Task: Propose necessary updates to align with new protocols (Nushell-first, Context Workflow, Discord notifications, autonomous verification, `git-sync` after archiving).
+- [~] Task: Conductor - User Manual Verification 'Core File Creation / Update' (Protocol in workflow.md)
 
 ## Phase 3: Synchronize Documentation
 - [ ] Task: Ensure all project-level documentation is synchronized with the new framework structure.
