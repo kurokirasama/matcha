@@ -1,4 +1,3 @@
-# Project Todos
+when pr-ing
 
-- [ ] Complete Conductor setup.
-- [ ] Implement `matcha search`.
+- about u keybind: mention that the pluging didnt work for me, and after trying modifiying it I noticed that wast possible

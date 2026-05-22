@@ -272,6 +272,7 @@ type EmailBodyFetchedMsg struct {
 	Err          error
 	AccountID    string
 	Mailbox      MailboxKind
+	FolderName   string
 }
 
 // --- Multi-Account Messages ---
