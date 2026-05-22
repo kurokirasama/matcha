@@ -2,7 +2,7 @@
 
 ## Phase 1: State & Configuration
 - [ ] Task: Add `hideSidebar bool` to the `FolderInbox` struct in `tui/folder_inbox.go`.
-- [ ] Task: Define `ToggleSidebar` action in `config/keybinds.go` and map it to `f` in `default_keybinds.json`. (Move `filter` to `F`).
+- [ ] Task: Define `ToggleSidebar` action in `config/keybinds.go` and map it to `F` in `default_keybinds.json`. (Keep `f` as `filter`).
 - [ ] Task: Conductor - User Manual Verification 'State Setup' (Protocol in workflow.md)
 
 ## Phase 2: Layout Logic

@@ -9,7 +9,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Native Folder Panel Toggle (f)**
+- [ ] **Track: Native Folder Panel Toggle (F)**
 *Link: [./tracks/folder_panel_toggle_20260521/](./tracks/folder_panel_toggle_20260521/)*
 
 ---
@@ -29,7 +29,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Fuzzy Folder Jump (j)**
+- [ ] **Track: Fuzzy Folder Jump (g)**
 *Link: [./tracks/fuzzy_folder_jump_20260521/](./tracks/fuzzy_folder_jump_20260521/)*
 
 ---
