@@ -5,10 +5,10 @@
 - [x] Task: Add default `c` mapping in `config/default_keybinds.json`. 60810fb
 - [x] Task: Conductor - User Manual Verification 'Config' (Protocol in workflow.md) 60810fb
 
-## Phase 2: TUI Implementation
+## Phase 2: TUI Implementation [checkpoint: 96abe46]
 - [x] Task: Add keypress handler for `Compose` in `tui/inbox.go`. 2ff1331
 - [x] Task: Update help bindings to display the new shortcut. b2676f1
-- [ ] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md) b2676f1
 
 ## Phase 3: Verification
 - [ ] Task: Confirm `c` triggers the composer.
