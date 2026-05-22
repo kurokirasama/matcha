@@ -4,11 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Native Toggle Read Status**
-*Link: [./tracks/toggle_read_status_20260521/](./tracks/toggle_read_status_20260521/)*
-
----
-
 - [ ] **Track: Native Folder Panel Toggle (F)**
 *Link: [./tracks/folder_panel_toggle_20260521/](./tracks/folder_panel_toggle_20260521/)*
 
