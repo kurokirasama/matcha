@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Native Folder Panel Toggle (F)**
+- [x] **Track: Native Folder Panel Toggle (F)**
 *Link: [./tracks/folder_panel_toggle_20260521/](./tracks/folder_panel_toggle_20260521/)*
 
 ---
