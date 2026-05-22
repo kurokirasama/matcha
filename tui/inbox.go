@@ -459,6 +459,7 @@ func (m *Inbox) updateList() {
 		bindings := []key.Binding{
 			key.NewBinding(key.WithKeys("v"), key.WithHelp("v", t("inbox.visual_mode"))),
 			key.NewBinding(key.WithKeys(m.toggleThreadedKey()), key.WithHelp(m.toggleThreadedKey(), "threaded")),
+			key.NewBinding(key.WithKeys(config.Keybinds.Inbox.ToggleRead), key.WithHelp(config.Keybinds.Inbox.ToggleRead, "read status")),
 			key.NewBinding(key.WithKeys("d"), key.WithHelp("\uf014 d", t("inbox.delete"))),
 			key.NewBinding(key.WithKeys("a"), key.WithHelp("\uea98 a", t("inbox.archive"))),
 			key.NewBinding(key.WithKeys("r"), key.WithHelp("\ue348 r", t("inbox.refresh"))),
@@ -986,6 +987,50 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
+		case kb.Inbox.ToggleRead:
+			if m.visualMode && len(m.selectedUIDs) > 0 {
+				uids := make([]uint32, 0, len(m.selectionOrder))
+				accountID := ""
+				for _, uid := range m.selectionOrder {
+					if aid, ok := m.selectedUIDs[uid]; ok {
+						uids = append(uids, uid)
+						accountID = aid
+					}
+				}
+
+				allRead := true
+				for _, i := range m.list.Items() {
+					itm := i.(item)
+					if _, selected := m.selectedUIDs[itm.uid]; selected {
+						if !itm.isRead {
+							allRead = false
+							break
+						}
+					}
+				}
+
+				m.visualMode = false
+				m.selectedUIDs = make(map[uint32]string)
+				m.selectionOrder = []uint32{}
+				m.updateListTitle()
+
+				return m, func() tea.Msg {
+					if allRead {
+						return BatchMarkUnreadMsg{UIDs: uids, AccountID: accountID, Mailbox: m.mailbox}
+					}
+					return BatchMarkReadMsg{UIDs: uids, AccountID: accountID, Mailbox: m.mailbox}
+				}
+			} else {
+				selectedItem, ok := m.list.SelectedItem().(item)
+				if ok && selectedItem.uid != 0 {
+					return m, func() tea.Msg {
+						if selectedItem.isRead {
+							return MarkEmailAsUnreadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
+						}
+						return MarkEmailAsReadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
+					}
+				}
+			}
 		case kb.Inbox.Refresh:
 			m.isRefreshing = true
 			m.list.Title = m.getTitle()
@@ -1016,7 +1061,7 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					email = m.GetEmailAtIndex(idx)
 				}
 				return m, func() tea.Msg {
-					return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, Email: email}
+					return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, FolderName: m.folderKey(), Email: email}
 				}
 			}
 		}
@@ -1291,6 +1336,14 @@ func (m *Inbox) MarkEmailAsRead(uid uint32, accountID string) {
 			}
 		}
 	}
+	if m.searchActive {
+		for i := range m.searchResults {
+			if m.searchResults[i].UID == uid && m.searchResults[i].AccountID == accountID {
+				m.searchResults[i].IsRead = true
+				break
+			}
+		}
+	}
 	m.updateList()
 }
 
@@ -1306,6 +1359,14 @@ func (m *Inbox) MarkEmailAsUnread(uid uint32, accountID string) {
 		for i := range emails {
 			if emails[i].UID == uid {
 				emails[i].IsRead = false
+				break
+			}
+		}
+	}
+	if m.searchActive {
+		for i := range m.searchResults {
+			if m.searchResults[i].UID == uid && m.searchResults[i].AccountID == accountID {
+				m.searchResults[i].IsRead = false
 				break
 			}
 		}

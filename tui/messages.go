@@ -17,12 +17,20 @@ const (
 	MailboxArchive MailboxKind = "archive"
 )
 
+func (k MailboxKind) folderName(override string) string {
+	if override != "" {
+		return override
+	}
+	return string(k)
+}
+
 type ViewEmailMsg struct {
-	Index     int
-	UID       uint32
-	AccountID string
-	Mailbox   MailboxKind
-	Email     *fetcher.Email
+	Index      int
+	UID        uint32
+	AccountID  string
+	Mailbox    MailboxKind
+	FolderName string
+	Email      *fetcher.Email
 }
 
 type SendEmailMsg struct {
@@ -264,6 +272,7 @@ type EmailBodyFetchedMsg struct {
 	Err          error
 	AccountID    string
 	Mailbox      MailboxKind
+	FolderName   string
 }
 
 // --- Multi-Account Messages ---
@@ -482,6 +491,13 @@ type MarkEmailAsReadMsg struct {
 	FolderName string
 }
 
+// MarkEmailAsUnreadMsg signals that an email should be marked as unread on the server.
+type MarkEmailAsUnreadMsg struct {
+	UID        uint32
+	AccountID  string
+	FolderName string
+}
+
 // EmailMarkedReadMsg signals that an email was marked as read.
 type EmailMarkedReadMsg struct {
 	UID       uint32
@@ -494,6 +510,19 @@ type EmailMarkedUnreadMsg struct {
 	UID       uint32
 	AccountID string
 	Err       error
+}
+
+// Batch operation messages for read status
+type BatchMarkReadMsg struct {
+	UIDs      []uint32
+	AccountID string
+	Mailbox   MailboxKind
+}
+
+type BatchMarkUnreadMsg struct {
+	UIDs      []uint32
+	AccountID string
+	Mailbox   MailboxKind
 }
 
 // FetchFolderMoreEmailsMsg signals a request to fetch more emails from a folder (pagination).

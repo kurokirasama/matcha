@@ -35,6 +35,7 @@ type GlobalKeys struct {
 type InboxKeys struct {
 	VisualMode     string `json:"visual_mode"`
 	ToggleThreaded string `json:"toggle_threaded"`
+	ToggleRead     string `json:"toggle_read"`
 	Delete         string `json:"delete"`
 	Archive        string `json:"archive"`
 	Refresh        string `json:"refresh"`
@@ -48,6 +49,7 @@ type InboxKeys struct {
 type EmailKeys struct {
 	Reply            string `json:"reply"`
 	Forward          string `json:"forward"`
+	ToggleRead       string `json:"toggle_read"`
 	Delete           string `json:"delete"`
 	Archive          string `json:"archive"`
 	ToggleImages     string `json:"toggle_images"`
@@ -144,6 +146,7 @@ func ValidateKeybinds(kb KeybindsConfig) []string {
 	check("inbox", map[string]string{
 		"visual_mode":     kb.Inbox.VisualMode,
 		"toggle_threaded": kb.Inbox.ToggleThreaded,
+		"toggle_read":     kb.Inbox.ToggleRead,
 		"delete":          kb.Inbox.Delete,
 		"archive":         kb.Inbox.Archive,
 		"refresh":         kb.Inbox.Refresh,
@@ -156,6 +159,7 @@ func ValidateKeybinds(kb KeybindsConfig) []string {
 	check("email", map[string]string{
 		"reply":             kb.Email.Reply,
 		"forward":           kb.Email.Forward,
+		"toggle_read":       kb.Email.ToggleRead,
 		"delete":            kb.Email.Delete,
 		"archive":           kb.Email.Archive,
 		"toggle_images":     kb.Email.ToggleImages,

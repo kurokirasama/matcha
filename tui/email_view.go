@@ -50,6 +50,7 @@ type EmailView struct {
 	focusOnAttachments bool
 	accountID          string
 	mailbox            MailboxKind
+	folderName         string
 	disableImages      bool
 	showImages         bool
 	isSMIME            bool
@@ -68,7 +69,7 @@ type EmailView struct {
 	columnOffset       int // horizontal offset for image rendering in split pane
 }
 
-func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox MailboxKind, disableImages bool) *EmailView {
+func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox MailboxKind, folderName string, disableImages bool) *EmailView {
 	isSMIME := false
 	smimeTrusted := false
 	isEncrypted := false
@@ -157,6 +158,7 @@ func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox Ma
 		emailIndex:        emailIndex,
 		accountID:         email.AccountID,
 		mailbox:           mailbox,
+		folderName:        folderName,
 		disableImages:     disableImages,
 		showImages:        showImages,
 		isSMIME:           isSMIME,
@@ -174,8 +176,8 @@ func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox Ma
 }
 
 // NewEmailViewPreview creates EmailView in preview mode with column offset for images
-func NewEmailViewPreview(email fetcher.Email, width, height, colOffset int, disableImages bool) *EmailView {
-	ev := NewEmailView(email, 0, width, height, MailboxInbox, disableImages)
+func NewEmailViewPreview(email fetcher.Email, folderName string, width, height, colOffset int, disableImages bool) *EmailView {
+	ev := NewEmailView(email, 0, width, height, MailboxInbox, folderName, disableImages)
 	ev.isPreviewMode = true
 	ev.columnOffset = colOffset
 	return ev
@@ -303,6 +305,25 @@ func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if len(m.email.Attachments) > 0 {
 					m.focusOnAttachments = true
 				}
+			case kb.Inbox.ToggleRead: // Reuse Inbox keybind for simplicity or use Email.ToggleRead if defined
+				// We'll use config.Keybinds.Email.ToggleRead if it's set, otherwise fallback to Inbox's
+				key := kb.Email.ToggleRead
+				if key == "" {
+					key = kb.Inbox.ToggleRead
+				}
+				if msg.String() == key {
+					uid := m.email.UID
+					accountID := m.accountID
+					isRead := m.email.IsRead
+					// Clear Kitty graphics before returning to mailbox
+					ClearKittyGraphics()
+					return m, tea.Batch(func() tea.Msg {
+						if isRead {
+							return MarkEmailAsUnreadMsg{UID: uid, AccountID: accountID, FolderName: m.mailbox.folderName(m.folderName)}
+						}
+						return MarkEmailAsReadMsg{UID: uid, AccountID: accountID, FolderName: m.mailbox.folderName(m.folderName)}
+					}, func() tea.Msg { return BackToMailboxMsg{Mailbox: m.mailbox} })
+				}
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -376,7 +397,11 @@ func (m *EmailView) View() tea.View {
 		help = helpStyle.Render(helpText)
 	} else {
 		var shortcuts strings.Builder
-		shortcuts.WriteString("\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • \uf435 tab: focus attachments • \ueb06 esc: back to inbox")
+		toggleReadKey := config.Keybinds.Email.ToggleRead
+		if toggleReadKey == "" {
+			toggleReadKey = config.Keybinds.Inbox.ToggleRead
+		}
+		shortcuts.WriteString(fmt.Sprintf("\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • %s: read status • \uf435 tab: focus attachments • \ueb06 esc: back to inbox", toggleReadKey))
 		if view.ImageProtocolSupported() {
 			shortcuts.WriteString("• \uf03e i: toggle images")
 		}

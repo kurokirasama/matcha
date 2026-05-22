@@ -28,7 +28,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	}
 
 	t.Run("Focus on attachments", func(t *testing.T) {
-		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 		if emailView.focusOnAttachments {
 			t.Error("focusOnAttachments should be initially false")
 		}
@@ -50,7 +50,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	})
 
 	t.Run("No focus on attachments when there are none", func(t *testing.T) {
-		emailView := NewEmailView(emailWithoutAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithoutAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 		if emailView.focusOnAttachments {
 			t.Error("focusOnAttachments should be initially false")
 		}
@@ -63,7 +63,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	})
 
 	t.Run("Navigate attachments", func(t *testing.T) {
-		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 		// Focus on attachments
 		model, _ := emailView.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 		emailView = model.(*EmailView)
@@ -95,7 +95,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	})
 
 	t.Run("Attachment navigation does not scroll body", func(t *testing.T) {
-		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 		emailView.viewport.SetHeight(2)
 		emailView.viewport.SetContent("line 1\nline 2\nline 3\nline 4\nline 5\n")
 		emailView.viewport.SetYOffset(1)
@@ -115,7 +115,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	})
 
 	t.Run("Download attachment", func(t *testing.T) {
-		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 		// Focus on attachments
 		model, _ := emailView.Update(tea.KeyPressMsg{Code: tea.KeyTab})
 		emailView = model.(*EmailView)
@@ -144,7 +144,7 @@ func TestEmailViewUpdate(t *testing.T) {
 	})
 
 	t.Run("Reply to email", func(t *testing.T) {
-		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, false)
+		emailView := NewEmailView(emailWithAttachments, 0, 80, 24, MailboxInbox, "INBOX", false)
 
 		_, cmd := emailView.Update(tea.KeyPressMsg{Code: 'r', Text: "r"})
 		if cmd == nil {
