@@ -4,13 +4,19 @@
 
 1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`.
 2. **The Tech Stack is Deliberate:** Changes to the tech stack must be documented in `tech-stack.md` *before* implementation.
-3. **Nushell-First Mandate:** Priority is given to Nushell pipelines for system interactions and data tasks. Activate `nushell-expert` before first use.
-4. **Context Engineering Protocol:** Always follow the structured Discovery -> Synthesis -> Planning -> Execution workflow. Never code without a complete mental model.
-5. **Test-Driven Development:** Write unit tests before implementing functionality.
-6. **High Code Coverage:** Aim for >80% code coverage for all modules.
-7. **User Experience First:** Every decision should prioritize user experience.
-8. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools.
-9. **Mandatory Reporting:** Follow the Discord notification protocol for user input and long tasks (>5min).
+3. **Dual-Branch Architecture (Public Repo):**
+    - **Public Branch (`master`/`main`):** For PRs to upstream. No Conductor/private artifacts.
+    - **Private Branch (`private`):** High-hierarchy branch. Contains `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`.
+4. **Nushell-First Mandate:** Priority is given to Nushell pipelines for system interactions and data tasks. Activate `nushell-expert` before first use.
+5. **Context Engineering Protocol:** Always follow the structured Discovery -> Synthesis -> Planning -> Execution workflow. Never code without a complete mental model.
+6. **Test-Driven Development:** Write unit tests before implementing functionality.
+7. **High Code Coverage:** Aim for >80% code coverage for all modules.
+8. **User Experience First:** Every decision should prioritize user experience.
+9. **Non-Interactive & CI-Aware:** Prefer non-interactive commands. Use `CI=true` for watch-mode tools.
+10. **Mandatory Discord Notification (CRITICAL Sequence):**
+    - `to-discord` MUST be executed and COMPLETED before `ask_user`.
+    - `to-discord` is a Nushell command.
+    - All reports for long tasks (>5min) follow this protocol.
 
 ## Task Workflow
 
@@ -105,7 +111,9 @@ All tasks follow a strict lifecycle:
     -   Record the SHA in `plan.md` using the format `[checkpoint: <sha>]`.
 
 10. **Track Cleanup & Synchronization:**
-    -   **CRITICAL:** Once a track is archived, activate the `git-sync` skill to fully synchronize the repository.
+    - **CRITICAL:** Once a track is archived, activate the `git-sync` skill.
+    - **Multi-Branch Sync:** Ensure `git-sync` is executed properly in both Public and Private branches.
+
 
 11. **Announce Completion:** Confirm the phase is complete and the checkpoint is recorded.
 
