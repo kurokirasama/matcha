@@ -375,7 +375,7 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		previewWidth := m.calculatePreviewWidth()
 		inboxWidth := m.calculateInboxWidth()
 		colOffset := sidebarWidth + 2 + inboxWidth + 2 // borders + padding
-		m.previewPane = NewEmailViewPreview(*email, previewWidth, m.height, colOffset, m.disableImages)
+		m.previewPane = NewEmailViewPreview(*email, m.currentFolder, previewWidth, m.height, colOffset, m.disableImages)
 		return m, nil
 	}
 

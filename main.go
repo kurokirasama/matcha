@@ -1440,7 +1440,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Find the index for the email view (used for display purposes)
 		emailIndex := m.getEmailIndex(msg.UID, msg.AccountID, msg.Mailbox)
-		emailView := tui.NewEmailView(*email, emailIndex, m.width, m.height, msg.Mailbox, m.config.DisableImages)
+		emailView := tui.NewEmailView(*email, emailIndex, m.width, m.height, msg.Mailbox, msg.FolderName, m.config.DisableImages)
 		m.current = emailView
 		m.syncPluginStatus()
 		m.syncPluginKeyBindings()
@@ -1787,6 +1787,50 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.batchDeleteEmailsCmd(account, msg.UIDs, msg.AccountID, folderName, msg.Mailbox, count),
 		)
 
+	case tui.MarkEmailAsReadMsg:
+		account := m.config.GetAccountByID(msg.AccountID)
+		if account == nil {
+			return m, nil
+		}
+		m.markEmailAsReadInStores(msg.UID, msg.AccountID)
+		return m, markEmailAsReadCmd(account, msg.UID, msg.AccountID, msg.FolderName)
+
+	case tui.MarkEmailAsUnreadMsg:
+		account := m.config.GetAccountByID(msg.AccountID)
+		if account == nil {
+			return m, nil
+		}
+		m.markEmailAsUnreadInStores(msg.UID, msg.AccountID)
+		return m, markEmailAsUnreadCmd(account, msg.UID, msg.AccountID, msg.FolderName)
+
+	case tui.BatchMarkReadMsg:
+		account := m.config.GetAccountByID(msg.AccountID)
+		if account == nil {
+			return m, nil
+		}
+		for _, uid := range msg.UIDs {
+			m.markEmailAsReadInStores(uid, msg.AccountID)
+		}
+		var cmds []tea.Cmd
+		for _, uid := range msg.UIDs {
+			cmds = append(cmds, markEmailAsReadCmd(account, uid, msg.AccountID, string(msg.Mailbox)))
+		}
+		return m, tea.Batch(cmds...)
+
+	case tui.BatchMarkUnreadMsg:
+		account := m.config.GetAccountByID(msg.AccountID)
+		if account == nil {
+			return m, nil
+		}
+		for _, uid := range msg.UIDs {
+			m.markEmailAsUnreadInStores(uid, msg.AccountID)
+		}
+		var cmds []tea.Cmd
+		for _, uid := range msg.UIDs {
+			cmds = append(cmds, markEmailAsUnreadCmd(account, uid, msg.AccountID, string(msg.Mailbox)))
+		}
+		return m, tea.Batch(cmds...)
+
 	case tui.BatchArchiveEmailsMsg:
 		tui.ClearKittyGraphics()
 		m.previousModel = m.current
@@ -1996,6 +2040,38 @@ func (m *mainModel) markEmailAsReadInStores(uid uint32, accountID string) {
 		for i := range folderEmails {
 			if folderEmails[i].UID == uid && folderEmails[i].AccountID == accountID {
 				folderEmails[i].IsRead = true
+				m.folderEmails[folderName] = folderEmails
+				go saveFolderEmailsToCache(folderName, folderEmails)
+				break
+			}
+		}
+	}
+	// Update the inbox UI
+	if m.folderInbox != nil {
+		m.folderInbox.GetInbox().MarkEmailAsRead(uid, accountID)
+	}
+}
+
+func (m *mainModel) markEmailAsUnreadInStores(uid uint32, accountID string) {
+	for i := range m.emails {
+		if m.emails[i].UID == uid && m.emails[i].AccountID == accountID {
+			m.emails[i].IsRead = false
+			break
+		}
+	}
+	if emails, ok := m.emailsByAcct[accountID]; ok {
+		for i := range emails {
+			if emails[i].UID == uid {
+				emails[i].IsRead = false
+				break
+			}
+		}
+	}
+	// Update folder email cache
+	for folderName, folderEmails := range m.folderEmails {
+		for i := range folderEmails {
+			if folderEmails[i].UID == uid && folderEmails[i].AccountID == accountID {
+				folderEmails[i].IsRead = false
 				m.folderEmails[folderName] = folderEmails
 				go saveFolderEmailsToCache(folderName, folderEmails)
 				break

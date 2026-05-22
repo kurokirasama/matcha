@@ -986,6 +986,50 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
+		case kb.Inbox.ToggleRead:
+			if m.visualMode && len(m.selectedUIDs) > 0 {
+				uids := make([]uint32, 0, len(m.selectionOrder))
+				accountID := ""
+				for _, uid := range m.selectionOrder {
+					if aid, ok := m.selectedUIDs[uid]; ok {
+						uids = append(uids, uid)
+						accountID = aid
+					}
+				}
+
+				allRead := true
+				for _, i := range m.list.Items() {
+					itm := i.(item)
+					if _, selected := m.selectedUIDs[itm.uid]; selected {
+						if !itm.isRead {
+							allRead = false
+							break
+						}
+					}
+				}
+
+				m.visualMode = false
+				m.selectedUIDs = make(map[uint32]string)
+				m.selectionOrder = []uint32{}
+				m.updateListTitle()
+
+				return m, func() tea.Msg {
+					if allRead {
+						return BatchMarkUnreadMsg{UIDs: uids, AccountID: accountID, Mailbox: m.mailbox}
+					}
+					return BatchMarkReadMsg{UIDs: uids, AccountID: accountID, Mailbox: m.mailbox}
+				}
+			} else {
+				selectedItem, ok := m.list.SelectedItem().(item)
+				if ok && selectedItem.uid != 0 {
+					return m, func() tea.Msg {
+						if selectedItem.isRead {
+							return MarkEmailAsUnreadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
+						}
+						return MarkEmailAsReadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
+					}
+				}
+			}
 		case kb.Inbox.Refresh:
 			m.isRefreshing = true
 			m.list.Title = m.getTitle()
@@ -1016,7 +1060,7 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					email = m.GetEmailAtIndex(idx)
 				}
 				return m, func() tea.Msg {
-					return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, Email: email}
+					return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, FolderName: m.folderKey(), Email: email}
 				}
 			}
 		}
