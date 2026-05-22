@@ -100,6 +100,8 @@ type FolderInbox struct {
 	// Image rendering preference, propagated from config.
 	disableImages bool
 
+	hideSidebar bool
+
 	// Split pane state
 	previewPane        *EmailView
 	previewedUID       uint32
@@ -273,6 +275,10 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 			}
+		case kb.Inbox.ToggleSidebar:
+			m.hideSidebar = !m.hideSidebar
+			// Trigger a recalculation of dimensions
+			return m.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 		}
 
 	case tea.WindowSizeMsg:
@@ -290,7 +296,11 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		} else {
 			// Original two-pane resize
-			inboxWidth := msg.Width - sidebarWidth - 3
+			sw := sidebarWidth
+			if m.hideSidebar {
+				sw = 0
+			}
+			inboxWidth := msg.Width - sw - 3
 			if inboxWidth < 20 {
 				inboxWidth = 20
 			}
@@ -506,25 +516,38 @@ func (m *FolderInbox) switchFolder() tea.Cmd {
 }
 
 func (m *FolderInbox) View() tea.View {
-	// Render sidebar
-	sidebar := m.renderSidebar()
-
 	var content string
+	var sidebar string
+	if !m.hideSidebar {
+		sidebar = m.renderSidebar()
+	}
 
 	if m.previewPane != nil {
 		// Three-pane layout: folders | inbox | email preview
 		inboxPane := m.renderInboxPane()
 		previewPane := m.renderPreviewPane()
-		content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+		if m.hideSidebar {
+			content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, previewPane)
+		} else {
+			content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+		}
 	} else if m.previewedUID != 0 {
 		// Split pane loading state (body being fetched)
 		inboxPane := m.renderInboxPane()
 		emptyPreview := m.renderEmptyPreview()
-		content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+		if m.hideSidebar {
+			content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, emptyPreview)
+		} else {
+			content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+		}
 	} else {
 		// Two-pane layout (original): folders | inbox
 		inboxView := m.inbox.View().Content
-		content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxView)
+		if m.hideSidebar {
+			content = inboxView
+		} else {
+			content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxView)
+		}
 	}
 
 	// If move overlay is active, render it on top
@@ -852,7 +875,11 @@ func (m *FolderInbox) findEmailByUID(uid uint32, accountID string) *fetcher.Emai
 
 // calculatePreviewWidth calculates width for preview pane
 func (m *FolderInbox) calculatePreviewWidth() int {
-	remainingWidth := m.width - sidebarWidth - 4 // 4 for borders
+	sw := sidebarWidth
+	if m.hideSidebar {
+		sw = 0
+	}
+	remainingWidth := m.width - sw - 4 // 4 for borders
 	inboxWidth := int(float64(remainingWidth) * 0.4)
 	if inboxWidth < 30 {
 		inboxWidth = 30
@@ -866,7 +893,11 @@ func (m *FolderInbox) calculatePreviewWidth() int {
 
 // calculateInboxWidth calculates width for inbox pane in split mode
 func (m *FolderInbox) calculateInboxWidth() int {
-	remainingWidth := m.width - sidebarWidth - 4
+	sw := sidebarWidth
+	if m.hideSidebar {
+		sw = 0
+	}
+	remainingWidth := m.width - sw - 4
 	inboxWidth := int(float64(remainingWidth) * 0.4)
 	if inboxWidth < 30 {
 		inboxWidth = 30

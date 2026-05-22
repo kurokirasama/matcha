@@ -122,3 +122,44 @@ func TestSearchOverlayKeysNotIntercepted(t *testing.T) {
 		t.Fatalf("search input should contain typed character, got %q", got)
 	}
 }
+
+func TestFolderInbox_ToggleSidebar(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	
+	// Set initial window size
+	width := 200
+	height := 60
+	model, _ := fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+	fi = model.(*FolderInbox)
+
+	initialInboxWidth := fi.inbox.list.Width()
+	
+	// Simulate pressing 'F' to toggle sidebar
+	model, _ = fi.Update(tea.KeyPressMsg{Code: 'F', Text: "F"})
+	fi = model.(*FolderInbox)
+
+	if !fi.hideSidebar {
+		t.Error("expected sidebar to be hidden after pressing 'F'")
+	}
+
+	hiddenSidebarInboxWidth := fi.inbox.list.Width()
+	
+	if hiddenSidebarInboxWidth <= initialInboxWidth {
+		t.Errorf("expected inbox width to increase when sidebar is hidden, got %d <= %d", hiddenSidebarInboxWidth, initialInboxWidth)
+	}
+
+	// Toggle back
+	model, _ = fi.Update(tea.KeyPressMsg{Code: 'F', Text: "F"})
+	fi = model.(*FolderInbox)
+
+	if fi.hideSidebar {
+		t.Error("expected sidebar to be visible after pressing 'F' again")
+	}
+
+	if fi.inbox.list.Width() != initialInboxWidth {
+		t.Errorf("expected inbox width to return to %d, got %d", initialInboxWidth, fi.inbox.list.Width())
+	}
+}
