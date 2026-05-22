@@ -7,7 +7,7 @@
 
 ## Phase 2: TUI Implementation
 - [x] Task: Add keypress handler for `Compose` in `tui/inbox.go`. 2ff1331
-- [~] Task: Update help bindings to display the new shortcut.
+- [x] Task: Update help bindings to display the new shortcut. b2676f1
 - [ ] Task: Conductor - User Manual Verification 'Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Verification
