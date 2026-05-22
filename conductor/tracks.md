@@ -36,3 +36,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Interactive Send Blocking Hooks**
 *Link: [./tracks/interactive_send_hooks_20260521/](./tracks/interactive_send_hooks_20260521/)*
+
+---
+
+- [ ] **Track: Synchronize Fork with Upstream**
+*Link: [./tracks/sync_upstream_20260521/](./tracks/sync_upstream_20260521/)*

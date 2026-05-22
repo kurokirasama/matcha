@@ -1,0 +1,20 @@
+# Implementation Plan: Synchronize Fork with Upstream
+
+## Phase 1: Upstream Sync (Master)
+- [ ] Task: Fetch latest changes from `upstream` remote.
+- [ ] Task: Switch to local `master` branch.
+- [ ] Task: Merge `upstream/master` into local `master`.
+- [ ] Task: Push updated `master` to `origin/master`.
+- [ ] Task: Conductor - User Manual Verification 'Master Sync' (Protocol in workflow.md)
+
+## Phase 2: Private Branch Update
+- [ ] Task: Switch to local `private` branch.
+- [ ] Task: Merge local `master` into `private`.
+- [ ] Task: Resolve any conflicts in `private` (e.g., in `todos.md` or `conductor/` if accidentally touched).
+- [ ] Task: Conductor - User Manual Verification 'Private Sync' (Protocol in workflow.md)
+
+## Phase 3: Verification & Compatibility
+- [ ] Task: Verify application builds successfully (`make build`).
+- [ ] Task: Run full test suite (`make test`).
+- [ ] Task: Manually verify the "Native Toggle Read Status" feature (`bin/matcha`).
+- [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
