@@ -1,8 +1,8 @@
 # Implementation Plan: Native Inbox Compose Keybind
 
 ## Phase 1: Configuration
-- [ ] Task: Add `Compose` to `InboxKeys` in `config/keybinds.go`.
-- [ ] Task: Add default `c` mapping in `config/default_keybinds.json`.
+- [x] Task: Add `Compose` to `InboxKeys` in `config/keybinds.go`. d7bb401
+- [~] Task: Add default `c` mapping in `config/default_keybinds.json`.
 - [ ] Task: Conductor - User Manual Verification 'Config' (Protocol in workflow.md)
 
 ## Phase 2: TUI Implementation
