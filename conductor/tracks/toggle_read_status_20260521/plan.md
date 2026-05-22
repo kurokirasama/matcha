@@ -1,6 +1,6 @@
 # Implementation Plan: Native Toggle Read Status
 
-## Phase 1: Keybinding & Action Definition
+## Phase 1: Keybinding & Action Definition [checkpoint: 1721657]
 - [x] Task: Add `ToggleRead` to `InboxKeys` and `EmailKeys` in `config/keybinds.go`. 76d3677
 - [x] Task: Add default `u` mapping for `toggle_read` in `config/default_keybinds.json`. 76d3677
 - [x] Task: Conductor - User Manual Verification 'Keybinding Setup' (Protocol in workflow.md) 76d3677
