@@ -39,5 +39,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Synchronize Fork with Upstream**
+- [~] **Track: Synchronize Fork with Upstream**
 *Link: [./tracks/sync_upstream_20260521/](./tracks/sync_upstream_20260521/)*
