@@ -460,6 +460,7 @@ func (m *Inbox) updateList() {
 			key.NewBinding(key.WithKeys("v"), key.WithHelp("v", t("inbox.visual_mode"))),
 			key.NewBinding(key.WithKeys(m.toggleThreadedKey()), key.WithHelp(m.toggleThreadedKey(), "threaded")),
 			key.NewBinding(key.WithKeys(config.Keybinds.Inbox.ToggleRead), key.WithHelp(config.Keybinds.Inbox.ToggleRead, "read status")),
+			key.NewBinding(key.WithKeys(config.Keybinds.Inbox.Compose), key.WithHelp(config.Keybinds.Inbox.Compose, t("inbox.compose"))),
 			key.NewBinding(key.WithKeys("d"), key.WithHelp("\uf014 d", t("inbox.delete"))),
 			key.NewBinding(key.WithKeys("a"), key.WithHelp("\uea98 a", t("inbox.archive"))),
 			key.NewBinding(key.WithKeys("r"), key.WithHelp("\ue348 r", t("inbox.refresh"))),
