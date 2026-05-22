@@ -987,6 +987,10 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					}
 				}
 			}
+		case kb.Inbox.Compose:
+			return m, func() tea.Msg {
+				return GoToSendMsg{}
+			}
 		case kb.Inbox.ToggleRead:
 			if m.visualMode && len(m.selectedUIDs) > 0 {
 				uids := make([]uint32, 0, len(m.selectionOrder))
