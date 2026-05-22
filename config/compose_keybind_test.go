@@ -22,3 +22,12 @@ func TestKeybinds_ComposeExists(t *testing.T) {
 		t.Errorf("Inbox.Compose not set correctly, got %q", kb.Inbox.Compose)
 	}
 }
+
+func TestKeybinds_ComposeDefaultMapping(t *testing.T) {
+	// Verify that the default mapping for compose is 'c'
+	kb := defaultKeybinds()
+	
+	if kb.Inbox.Compose != "c" {
+		t.Errorf("Default Inbox.Compose should be 'c', got %q", kb.Inbox.Compose)
+	}
+}
