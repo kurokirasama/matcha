@@ -9,6 +9,7 @@
     "visual_mode": "v",
     "toggle_threaded": "T",
     "toggle_read": "u",
+    "toggle_sidebar": "F",
     "delete": "d",
     "archive": "a",
     "refresh": "r",

@@ -36,6 +36,7 @@ type InboxKeys struct {
 	VisualMode     string `json:"visual_mode"`
 	ToggleThreaded string `json:"toggle_threaded"`
 	ToggleRead     string `json:"toggle_read"`
+	ToggleSidebar  string `json:"toggle_sidebar"`
 	Delete         string `json:"delete"`
 	Archive        string `json:"archive"`
 	Refresh        string `json:"refresh"`
@@ -147,6 +148,7 @@ func ValidateKeybinds(kb KeybindsConfig) []string {
 		"visual_mode":     kb.Inbox.VisualMode,
 		"toggle_threaded": kb.Inbox.ToggleThreaded,
 		"toggle_read":     kb.Inbox.ToggleRead,
+		"toggle_sidebar":  kb.Inbox.ToggleSidebar,
 		"delete":          kb.Inbox.Delete,
 		"archive":         kb.Inbox.Archive,
 		"refresh":         kb.Inbox.Refresh,
