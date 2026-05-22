@@ -7,11 +7,11 @@
 - [x] Task: Push updated `master` to `origin/master`.
 - [x] Task: Conductor - User Manual Verification 'Master Sync' (Protocol in workflow.md)
 
-## Phase 2: Private Branch Update
-- [ ] Task: Switch to local `private` branch.
-- [ ] Task: Merge local `master` into `private`.
-- [ ] Task: Resolve any conflicts in `private` (e.g., in `todos.md` or `conductor/` if accidentally touched).
-- [ ] Task: Conductor - User Manual Verification 'Private Sync' (Protocol in workflow.md)
+## Phase 2: Private Branch Update [checkpoint: 510dfb6]
+- [x] Task: Switch to local `private` branch.
+- [x] Task: Merge local `master` into `private`.
+- [x] Task: Resolve any conflicts in `private` (e.g., in `todos.md` or `conductor/` if accidentally touched).
+- [x] Task: Conductor - User Manual Verification 'Private Sync' (Protocol in workflow.md)
 
 ## Phase 3: Verification & Compatibility
 - [ ] Task: Verify application builds successfully (`make build`).
