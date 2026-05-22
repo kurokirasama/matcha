@@ -315,12 +315,14 @@ func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					uid := m.email.UID
 					accountID := m.accountID
 					isRead := m.email.IsRead
-					return m, func() tea.Msg {
+					// Clear Kitty graphics before returning to mailbox
+					ClearKittyGraphics()
+					return m, tea.Batch(func() tea.Msg {
 						if isRead {
 							return MarkEmailAsUnreadMsg{UID: uid, AccountID: accountID, FolderName: m.mailbox.folderName(m.folderName)}
 						}
 						return MarkEmailAsReadMsg{UID: uid, AccountID: accountID, FolderName: m.mailbox.folderName(m.folderName)}
-					}
+					}, func() tea.Msg { return BackToMailboxMsg{Mailbox: m.mailbox} })
 				}
 			}
 		}
@@ -395,7 +397,11 @@ func (m *EmailView) View() tea.View {
 		help = helpStyle.Render(helpText)
 	} else {
 		var shortcuts strings.Builder
-		shortcuts.WriteString("\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • \uf435 tab: focus attachments • \ueb06 esc: back to inbox")
+		toggleReadKey := config.Keybinds.Email.ToggleRead
+		if toggleReadKey == "" {
+			toggleReadKey = config.Keybinds.Inbox.ToggleRead
+		}
+		shortcuts.WriteString(fmt.Sprintf("\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • %s: read status • \uf435 tab: focus attachments • \ueb06 esc: back to inbox", toggleReadKey))
 		if view.ImageProtocolSupported() {
 			shortcuts.WriteString("• \uf03e i: toggle images")
 		}
