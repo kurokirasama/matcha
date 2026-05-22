@@ -4,7 +4,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Native Toggle Read Status**
+- [x] **Track: Native Toggle Read Status**
 *Link: [./tracks/toggle_read_status_20260521/](./tracks/toggle_read_status_20260521/)*
 
 ---
