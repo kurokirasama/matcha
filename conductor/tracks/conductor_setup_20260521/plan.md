@@ -12,5 +12,5 @@
 - [x] Task: Conductor - User Manual Verification 'Core File Creation / Update' (Protocol in workflow.md)
 
 ## Phase 3: Synchronize Documentation
-- [ ] Task: Ensure all project-level documentation is synchronized with the new framework structure.
-- [ ] Task: Conductor - User Manual Verification 'Synchronize Documentation' (Protocol in workflow.md)
+- [x] Task: Ensure all project-level documentation is synchronized with the new framework structure.
+- [~] Task: Conductor - User Manual Verification 'Synchronize Documentation' (Protocol in workflow.md)
