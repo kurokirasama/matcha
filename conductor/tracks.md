@@ -4,5 +4,45 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Initialize or update Conductor framework guidelines and project documentation.**
-  *Link: [./archives/conductor_setup_20260521/](./archives/conductor_setup_20260521/)*
+- [ ] **Track: Native Toggle Read Status**
+*Link: [./tracks/toggle_read_status_20260521/](./tracks/toggle_read_status_20260521/)*
+
+---
+
+- [ ] **Track: Native Folder Panel Toggle (f)**
+*Link: [./tracks/folder_panel_toggle_20260521/](./tracks/folder_panel_toggle_20260521/)*
+
+---
+
+- [ ] **Track: Native Inbox Compose Keybind (c)**
+*Link: [./tracks/inbox_compose_keybind_20260521/](./tracks/inbox_compose_keybind_20260521/)*
+
+---
+
+- [ ] **Track: Inbox Layout Refactor & Horizontal Preview (L)**
+*Link: [./tracks/inbox_layout_refactor_20260521/](./tracks/inbox_layout_refactor_20260521/)*
+
+---
+
+- [ ] **Track: Recipient Summary & Toggle (v)**
+*Link: [./tracks/recipient_summary_toggle_20260521/](./tracks/recipient_summary_toggle_20260521/)*
+
+---
+
+- [ ] **Track: Fuzzy Folder Jump (j)**
+*Link: [./tracks/fuzzy_folder_jump_20260521/](./tracks/fuzzy_folder_jump_20260521/)*
+
+---
+
+- [ ] **Track: Search by Folder Syntax**
+*Link: [./tracks/search_by_folder_20260521/](./tracks/search_by_folder_20260521/)*
+
+---
+
+- [ ] **Track: Google Contacts Sync (Native)**
+*Link: [./tracks/google_contacts_import_20260521/](./tracks/google_contacts_import_20260521/)*
+
+---
+
+- [ ] **Track: Interactive Send Blocking Hooks**
+*Link: [./tracks/interactive_send_hooks_20260521/](./tracks/interactive_send_hooks_20260521/)*
