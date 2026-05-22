@@ -10,6 +10,9 @@
 - [x] Task: Ensure the daemon is notified of the status change to sync with the backend. a38c3cd
 - [x] Task: Conductor - User Manual Verification 'Core Implementation' (Protocol in workflow.md) a38c3cd
 
-## Phase 3: Verification
-- [ ] Task: Verify toggling works in both list and view modes.
-- [ ] Task: Verify status persists after refreshing the inbox.
+## Phase 3: UI Refinement & Verification [checkpoint: 148f7b2]
+- [x] Task: Update help bar in inbox and email views to show `u` keybinding. 148f7b2
+- [x] Task: Implement exit-to-inbox behavior when toggling read status in email view. 148f7b2
+- [x] Task: Verify toggling works in both list and view modes. 148f7b2
+- [x] Task: Verify status persists after refreshing the inbox. 148f7b2
+- [x] Task: Conductor - User Manual Verification 'UI Refinement' (Protocol in workflow.md) 148f7b2
