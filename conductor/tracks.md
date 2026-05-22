@@ -29,11 +29,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Search by Folder Syntax**
-*Link: [./tracks/search_by_folder_20260521/](./tracks/search_by_folder_20260521/)*
-
----
-
 - [ ] **Track: Google Contacts Sync (Native)**
 *Link: [./tracks/google_contacts_import_20260521/](./tracks/google_contacts_import_20260521/)*
 
