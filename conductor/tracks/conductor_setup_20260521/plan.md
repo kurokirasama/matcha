@@ -17,6 +17,6 @@
 
 ## Phase 4: Dual-Branch Strategy Implementation
 - [x] Task: Update `workflow.md` to define the 2-branch strategy (Public/Private), Discord timing, and multi-branch `git-sync`.
-- [~] Task: Create the `private` branch and migrate `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`.
-- [ ] Task: Clean the public branch (`master`) of all private artifacts.
-- [ ] Task: Conductor - User Manual Verification 'Dual-Branch Strategy' (Protocol in workflow.md)
+- [x] Task: Create the `private` branch and migrate `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`.
+- [x] Task: Clean the public branch (`master`) of all private artifacts.
+- [~] Task: Conductor - User Manual Verification 'Dual-Branch Strategy' (Protocol in workflow.md)
