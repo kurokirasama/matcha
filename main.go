@@ -1360,6 +1360,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					Attachments:  attachments,
 					AccountID:    msg.AccountID,
 					Mailbox:      msg.Mailbox,
+					FolderName:   folderName,
 				}
 			}
 		}
@@ -2067,38 +2068,6 @@ func (m *mainModel) markEmailAsUnreadInStores(uid uint32, accountID string) {
 			}
 		}
 	}
-	// Update folder email cache
-	for folderName, folderEmails := range m.folderEmails {
-		for i := range folderEmails {
-			if folderEmails[i].UID == uid && folderEmails[i].AccountID == accountID {
-				folderEmails[i].IsRead = false
-				m.folderEmails[folderName] = folderEmails
-				go saveFolderEmailsToCache(folderName, folderEmails)
-				break
-			}
-		}
-	}
-	// Update the inbox UI
-	if m.folderInbox != nil {
-		m.folderInbox.GetInbox().MarkEmailAsRead(uid, accountID)
-	}
-}
-
-func (m *mainModel) markEmailAsUnreadInStores(uid uint32, accountID string) {
-	for i := range m.emails {
-		if m.emails[i].UID == uid && m.emails[i].AccountID == accountID {
-			m.emails[i].IsRead = false
-			break
-		}
-	}
-	if emails, ok := m.emailsByAcct[accountID]; ok {
-		for i := range emails {
-			if emails[i].UID == uid {
-				emails[i].IsRead = false
-				break
-			}
-		}
-	}
 	for folderName, folderEmails := range m.folderEmails {
 		for i := range folderEmails {
 			if folderEmails[i].UID == uid && folderEmails[i].AccountID == accountID {
@@ -2620,7 +2589,7 @@ func fetchEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, mailbox
 	return func() tea.Msg {
 		account := cfg.GetAccountByID(accountID)
 		if account == nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, Err: fmt.Errorf("account not found")}
+			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: string(mailbox), Err: fmt.Errorf("account not found")}
 		}
 
 		var (
@@ -2640,7 +2609,7 @@ func fetchEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, mailbox
 			body, bodyMIMEType, attachments, err = fetcher.FetchEmailBody(account, uid)
 		}
 		if err != nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, Err: err}
+			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: string(mailbox), Err: err}
 		}
 
 		return tui.EmailBodyFetchedMsg{
@@ -2650,6 +2619,7 @@ func fetchEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, mailbox
 			Attachments:  attachments,
 			AccountID:    accountID,
 			Mailbox:      mailbox,
+			FolderName:   string(mailbox),
 		}
 	}
 }
@@ -3008,12 +2978,12 @@ func fetchFolderEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, f
 	return func() tea.Msg {
 		account := cfg.GetAccountByID(accountID)
 		if account == nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, Err: fmt.Errorf("account not found")}
+			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: folderName, Err: fmt.Errorf("account not found")}
 		}
 
 		body, bodyMIMEType, attachments, err := fetcher.FetchFolderEmailBody(account, folderName, uid)
 		if err != nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, Err: err}
+			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: folderName, Err: err}
 		}
 
 		return tui.EmailBodyFetchedMsg{
@@ -3023,6 +2993,7 @@ func fetchFolderEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, f
 			Attachments:  attachments,
 			AccountID:    accountID,
 			Mailbox:      mailbox,
+			FolderName:   folderName,
 		}
 	}
 }

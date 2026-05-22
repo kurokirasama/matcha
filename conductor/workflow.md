@@ -5,8 +5,8 @@
 1. **The Plan is the Source of Truth:** All work must be tracked in `plan.md`.
 2. **The Tech Stack is Deliberate:** Changes to the tech stack must be documented in `tech-stack.md` *before* implementation.
 3. **Dual-Branch Architecture (Public Repo):**
-    - **Public Branch (`master`/`main`):** For PRs to upstream. No Conductor/private artifacts.
-    - **Private Branch (`private`):** High-hierarchy branch. Contains `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`.
+    - **Public Branch (`master`/`main`):** For PRs to upstream. No Conductor/private artifacts. Pushed to remote.
+    - **Private Branch (`private`):** High-hierarchy branch. Contains `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`. **STRICTLY LOCAL-ONLY (NEVER PUSHED).**
 4. **Nushell-First Mandate:** Priority is given to Nushell pipelines for system interactions and data tasks. Activate `nushell-expert` before first use.
 5. **Context Engineering Protocol:** Always follow the structured Discovery -> Synthesis -> Planning -> Execution workflow. Never code without a complete mental model.
 6. **Test-Driven Development:** Write unit tests before implementing functionality.
@@ -37,7 +37,11 @@ All tasks follow a strict lifecycle:
    - Write the minimum amount of application code necessary to make the failing tests pass.
    - Run the test suite again and confirm that all tests now pass. This is the "Green" phase.
 
-5. **Refactor (Optional but Recommended):**
+5. **Build Verification (MANDATORY):**
+   - **CRITICAL:** Always run `make build` (or the project's build command) to ensure the application compiles successfully with the new changes.
+   - **DO NOT** proceed to commit or request review if the build fails. Fix all compilation errors first.
+
+6. **Refactor (Optional but Recommended):**
    - With the safety of passing tests, refactor the implementation code and the test code to improve clarity, remove duplication, and enhance performance without changing the external behavior.
    - Rerun tests to ensure they still pass after refactoring.
 
@@ -121,6 +125,7 @@ All tasks follow a strict lifecycle:
 
 Before marking any task complete, verify:
 
+- [ ] Application builds successfully (`make build`)
 - [ ] All tests pass
 - [ ] Code coverage meets requirements (>80%)
 - [ ] Code follows project's code style guidelines (in `conductor/code_styleguides/`)
