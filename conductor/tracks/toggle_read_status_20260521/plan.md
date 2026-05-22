@@ -16,3 +16,6 @@
 - [x] Task: Verify toggling works in both list and view modes. 148f7b2
 - [x] Task: Verify status persists after refreshing the inbox. 148f7b2
 - [x] Task: Conductor - User Manual Verification 'UI Refinement' (Protocol in workflow.md) 148f7b2
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions f3ae6a0
