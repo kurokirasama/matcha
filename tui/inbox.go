@@ -1336,6 +1336,14 @@ func (m *Inbox) MarkEmailAsRead(uid uint32, accountID string) {
 			}
 		}
 	}
+	if m.searchActive {
+		for i := range m.searchResults {
+			if m.searchResults[i].UID == uid && m.searchResults[i].AccountID == accountID {
+				m.searchResults[i].IsRead = true
+				break
+			}
+		}
+	}
 	m.updateList()
 }
 
@@ -1351,6 +1359,14 @@ func (m *Inbox) MarkEmailAsUnread(uid uint32, accountID string) {
 		for i := range emails {
 			if emails[i].UID == uid {
 				emails[i].IsRead = false
+				break
+			}
+		}
+	}
+	if m.searchActive {
+		for i := range m.searchResults {
+			if m.searchResults[i].UID == uid && m.searchResults[i].AccountID == accountID {
+				m.searchResults[i].IsRead = false
 				break
 			}
 		}
