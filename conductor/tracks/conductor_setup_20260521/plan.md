@@ -1,0 +1,16 @@
+# Implementation Plan: Conductor Framework Initialization/Update
+
+## Phase 1: Memory Retrieval & Discovery
+- [ ] Task: Retrieve all Conductor-related guidelines and best practices from the Obsidian Knowledge Graph (via `obsidian-memory-expert`).
+- [ ] Task: Use `context-expert` to understand the current workspace structure and any existing Conductor configuration. Use `mcp__context-mode__ctx_batch_execute` for high-volume file discovery if the project is large.
+- [ ] Task: (MATLAB Only) Check for the presence of `.m` files or a `matlab/` directory to trigger MATLAB protocols.
+- [ ] Task: Conductor - User Manual Verification 'Memory Retrieval & Discovery' (Protocol in workflow.md)
+
+## Phase 2: Core File Creation / Update
+- [ ] Task: Create or update core files in the `conductor/` directory (`product.md`, `tech-stack.md`, `workflow.md`, `product-guidelines.md`, `tracks.md`, `index.md`).
+- [ ] Task: Propose necessary updates to align with new protocols (Nushell-first, Context Workflow, Discord notifications, autonomous verification, `git-sync` after archiving).
+- [ ] Task: Conductor - User Manual Verification 'Core File Creation / Update' (Protocol in workflow.md)
+
+## Phase 3: Synchronize Documentation
+- [ ] Task: Ensure all project-level documentation is synchronized with the new framework structure.
+- [ ] Task: Conductor - User Manual Verification 'Synchronize Documentation' (Protocol in workflow.md)
