@@ -15,8 +15,8 @@
 - [x] Task: Ensure all project-level documentation is synchronized with the new framework structure.
 - [x] Task: Conductor - User Manual Verification 'Synchronize Documentation' (Protocol in workflow.md)
 
-## Phase 4: Dual-Branch Strategy Implementation
+## Phase 4: Dual-Branch Strategy Implementation [checkpoint: e6d9ed7]
 - [x] Task: Update `workflow.md` to define the 2-branch strategy (Public/Private), Discord timing, and multi-branch `git-sync`.
 - [x] Task: Create the `private` branch and migrate `conductor/`, `tests/`, `GEMINI.md`, `.gitignore`, and `todos.md`.
 - [x] Task: Clean the public branch (`master`) of all private artifacts.
-- [~] Task: Conductor - User Manual Verification 'Dual-Branch Strategy' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Dual-Branch Strategy' (Protocol in workflow.md)
