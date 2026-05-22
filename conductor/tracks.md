@@ -7,7 +7,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Native Inbox Compose Keybind (c)**
+- [x] **Track: Native Inbox Compose Keybind (c)**
 *Link: [./tracks/inbox_compose_keybind_20260521/](./tracks/inbox_compose_keybind_20260521/)*
 
 ---
