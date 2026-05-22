@@ -1,0 +1,8 @@
+{
+  "track_id": "inbox_compose_keybind_20260521",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-05-21T10:00:00Z",
+  "updated_at": "2026-05-21T10:00:00Z",
+  "description": "Native 'c' keybinding for composing from inbox"
+}
