@@ -13,8 +13,8 @@
 - [x] Task: Resolve any conflicts in `private` (e.g., in `todos.md` or `conductor/` if accidentally touched).
 - [x] Task: Conductor - User Manual Verification 'Private Sync' (Protocol in workflow.md)
 
-## Phase 3: Verification & Compatibility
-- [ ] Task: Verify application builds successfully (`make build`).
-- [ ] Task: Run full test suite (`make test`).
-- [ ] Task: Manually verify the "Native Toggle Read Status" feature (`bin/matcha`).
-- [ ] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md)
+## Phase 3: Verification & Compatibility [checkpoint: 510dfb6]
+- [x] Task: Verify application builds successfully (`make build`). 20d031c
+- [x] Task: Run full test suite (`make test`). 20d031c
+- [x] Task: Manually verify the "Native Toggle Read Status" feature (`bin/matcha`). 20d031c
+- [x] Task: Conductor - User Manual Verification 'Final Verification' (Protocol in workflow.md) 20d031c
