@@ -67,6 +67,7 @@ type EmailView struct {
 	originalICSData    []byte
 	isPreviewMode      bool
 	columnOffset       int // horizontal offset for image rendering in split pane
+	rowOffset          int // vertical offset for image rendering in horizontal split pane
 }
 
 func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox MailboxKind, folderName string, disableImages bool) *EmailView {
@@ -450,7 +451,7 @@ func (m *EmailView) View() tea.View {
 			// always renders from the top-left), so we hide them once
 			// their start line scrolls above the viewport.
 			if p.Line >= yOffset && p.Line < yOffset+vpHeight {
-				screenRow := headerLines + (p.Line - yOffset)
+				screenRow := m.rowOffset + headerLines + (p.Line - yOffset)
 				if m.columnOffset > 0 {
 					view.RenderImageToStdout(p, screenRow, m.columnOffset+1)
 				} else {
@@ -509,6 +510,12 @@ func wrapBodyToWidth(body string, width int) string {
 // GetEmail returns the email being viewed
 func (m *EmailView) GetEmail() fetcher.Email {
 	return m.email
+}
+
+// SetOffsets sets the screen offsets for image rendering.
+func (m *EmailView) SetOffsets(row, col int) {
+	m.rowOffset = row
+	m.columnOffset = col
 }
 
 // renderCalendarInvite renders a calendar invite card
