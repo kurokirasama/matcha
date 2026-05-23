@@ -5,7 +5,8 @@
 - [x] Task: Add `Layout` field to `Config` struct using a strictly additive approach. ca4ee5b
 - [x] Task: Update serialization logic to ensure all existing fields are preserved during save/load. 1ec68d7
 - [x] Task: Add regression tests for config persistence to prevent data loss. e17e428
-- [ ] Task: Conductor - User Manual Verification 'Config Safety' (Protocol in workflow.md)
+- [x] Conductor - User Manual Verification 'Config Safety' (Protocol in workflow.md)
+[checkpoint: 77e0ecf]
 
 ## Phase 2: TUI Refactor & Layout Engine
 - [ ] Task: Modify `FolderInbox` model in `tui/folder_inbox.go` to handle dynamic split orientation.
