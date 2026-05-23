@@ -36,6 +36,7 @@ func (m *Settings) buildGeneralOptions() []generalOption {
 		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, ""},
 		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, ""},
 		{"settings_general.split_view", getLayoutLabel(m.cfg.Layout), "Orientation of the email preview pane.", false, ""},
+		{"settings_general.layout_quick_toggle", onOff(m.cfg.EnableQuickToggle), "Enable Shift+L shortcut to cycle layout modes.", false, ""},
 		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, ""},
 		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, ""},
 		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, ""},
@@ -104,21 +105,29 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				case config.LayoutHorizontal:
 					m.cfg.Layout = config.LayoutOff
 					m.cfg.EnableSplitPane = false
+					// Also force off quick toggle if horizontal
+					m.cfg.EnableQuickToggle = false
 				default:
 					m.cfg.Layout = config.LayoutOff
 					m.cfg.EnableSplitPane = false
 				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 4: // Threaded Conversation View
+			case 4: // Layout Quick Toggle
+				if m.cfg.Layout != config.LayoutHorizontal {
+					m.cfg.EnableQuickToggle = !m.cfg.EnableQuickToggle
+					_ = config.SaveConfig(m.cfg)
+					saved = true
+				}
+			case 5: // Threaded Conversation View
 				m.cfg.EnableThreaded = !m.cfg.EnableThreaded
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 5: // Detailed Dates
+			case 6: // Detailed Dates
 				m.cfg.EnableDetailedDates = !m.cfg.EnableDetailedDates
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 6: // Date Format
+			case 7: // Date Format
 				switch m.cfg.DateFormat {
 				case config.DateFormatEU:
 					m.cfg.DateFormat = config.DateFormatUS
@@ -129,7 +138,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 7: // Language
+			case 8: // Language
 				// Cycle through available languages
 				langs := i18n.LanguageCodes()
 				currentLang := m.cfg.GetLanguage()
@@ -150,7 +159,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 					func() tea.Msg { return ConfigSavedMsg{} },
 					func() tea.Msg { return LanguageChangedMsg{} },
 				)
-			case 8: // Edit Signature
+			case 9: // Edit Signature
 				if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
 					return m, func() tea.Msg { return GoToSignatureEditorMsg{} }
 				}
