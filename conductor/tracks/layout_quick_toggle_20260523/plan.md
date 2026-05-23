@@ -9,7 +9,7 @@
 [checkpoint: e9db627]
 
 #### Phase 2: Keybinding & TUI Logic
-- [ ] Task: Define the `Shift+L` keybinding in `tui/keys.go` (if not already present).
+- [x] Task: Define the `Shift+L` keybinding in `tui/keys.go` (if not already present). 47a65d3
 - [ ] Task: Modify `FolderInbox.Update` in `tui/folder_inbox.go` to handle the `Shift+L` message.
 - [ ] Task: Implement the layout cycling logic in `FolderInbox` based on the current `m.layout` and `m.config.EnableQuickToggle`.
 - [ ] Task: Add a new message type `ToggleLayoutMsg` (or similar) to notify the main model when the layout is changed via shortcut.
