@@ -14,7 +14,8 @@
 - [x] Task: Implement the layout cycling logic in `FolderInbox` based on the current `m.layout` and `m.config.EnableQuickToggle`. bd735a4
 - [x] Task: Add a new message type `ToggleLayoutMsg` (or similar) to notify the main model when the layout is changed via shortcut. bd735a4
 - [x] Task: Update `main.go` to handle layout changes from `FolderInbox`, update the config, and save to disk. bd735a4
-- [ ] Task: Conductor - User Manual Verification 'Shortcut Interaction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Shortcut Interaction' (Protocol in workflow.md)
+[checkpoint: a6957c0]
 
 #### Phase 3: Validation & Polish
 - [ ] Task: Add unit tests in `tui/folder_inbox_test.go` to verify `Shift+L` behavior in different modes.
