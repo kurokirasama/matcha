@@ -21,5 +21,6 @@
 - [x] Task: Add unit tests in `tui/folder_inbox_test.go` to verify `Shift+L` behavior in different modes. 2d17074
 - [x] Task: Add unit tests in `config/config_test.go` for the new config field persistence. 049372b
 - [x] Task: Implement the feedback notification when attempting to enable the toggle in Horizontal mode. eb81d40
-- [ ] Task: Run `make build` and perform end-to-end manual verification of all layout modes and the toggle.
-- [ ] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
+- [x] Task: Run `make build` and perform end-to-end manual verification of all layout modes and the toggle. 6368612
+- [x] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
+[checkpoint: 6368612]
