@@ -26,3 +26,9 @@
 - [x] Task: Run `make build` and perform end-to-end manual verification of all layout modes. af5d053
 - [x] Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
 [checkpoint: 2ff2eb0]
+
+## Phase 5: Layout Refinement & Bug Fixes
+- [x] Task: Fix `Inbox.SetSize` to use full height instead of hardcoded 50%.
+- [x] Task: Refactor `FolderInbox.View` to keep sidebar full-height in horizontal mode.
+- [x] Task: Correct `columnOffset` for images in horizontal preview mode.
+- [x] Task: Conductor - User Manual Verification 'Refined Layout' (Protocol in workflow.md)
