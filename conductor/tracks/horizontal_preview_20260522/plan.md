@@ -23,5 +23,5 @@
 [checkpoint: af5d053]
 
 ## Phase 4: Verification & Final Polish
-- [ ] Task: Run `make build` and perform end-to-end manual verification of all layout modes.
+- [x] Task: Run `make build` and perform end-to-end manual verification of all layout modes. af5d053
 - [ ] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
