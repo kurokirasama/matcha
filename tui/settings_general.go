@@ -13,6 +13,7 @@ type generalOption struct {
 	labelKey     string
 	value        string
 	tip          string
+	disabled     bool
 	isAccountSig bool
 	accountID    string
 }
@@ -32,16 +33,16 @@ func getLayoutLabel(mode config.LayoutMode) string {
 
 func (m *Settings) buildGeneralOptions() []generalOption {
 	opts := []generalOption{
-		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, ""},
-		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, ""},
-		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, ""},
-		{"settings_general.split_view", getLayoutLabel(m.cfg.Layout), "Orientation of the email preview pane.", false, ""},
-		{"settings_general.layout_quick_toggle", onOff(m.cfg.EnableQuickToggle), "Enable Shift+L shortcut to cycle layout modes.", false, ""},
-		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, ""},
-		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, ""},
-		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, ""},
-		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, ""},
-		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, ""},
+		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, false, ""},
+		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, false, ""},
+		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, false, ""},
+		{"settings_general.split_view", getLayoutLabel(m.cfg.Layout), "Orientation of the email preview pane.", false, false, ""},
+		{"settings_general.layout_quick_toggle", onOff(m.cfg.EnableQuickToggle), "Enable Shift+L shortcut to cycle layout modes.", m.cfg.Layout == config.LayoutHorizontal, false, ""},
+		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, false, ""},
+		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, false, ""},
+		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, false, ""},
+		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, false, ""},
+		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, false, ""},
 	}
 
 	for _, acc := range m.cfg.Accounts {
@@ -191,9 +192,15 @@ func (m *Settings) viewGeneral() string {
 		if !opt.isAccountSig {
 			label = t(opt.labelKey)
 		}
-		text := fmt.Sprintf("%s: %s", label, opt.value)
+		
+		val := opt.value
+		if opt.disabled {
+			val = fmt.Sprintf("\x1b[90m%s (Disabled)\x1b[m", val)
+		}
+
+		text := fmt.Sprintf("%s: %s", label, val)
 		if opt.labelKey == "settings_general.signature" || opt.isAccountSig {
-			text = fmt.Sprintf("%s (%s)", label, opt.value)
+			text = fmt.Sprintf("%s (%s)", label, val)
 		}
 
 		b.WriteString(style.Render(cursor+text) + "\n")
