@@ -18,7 +18,7 @@
 [checkpoint: a6957c0]
 
 #### Phase 3: Validation & Polish
-- [ ] Task: Add unit tests in `tui/folder_inbox_test.go` to verify `Shift+L` behavior in different modes.
+- [x] Task: Add unit tests in `tui/folder_inbox_test.go` to verify `Shift+L` behavior in different modes. 2d17074
 - [ ] Task: Add unit tests in `config/config_test.go` for the new config field persistence.
 - [ ] Task: Implement the feedback notification when attempting to enable the toggle in Horizontal mode.
 - [ ] Task: Run `make build` and perform end-to-end manual verification of all layout modes and the toggle.
