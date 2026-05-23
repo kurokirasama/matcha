@@ -102,6 +102,9 @@ type FolderInbox struct {
 
 	hideSidebar bool
 
+	// Layout orientation
+	layout config.LayoutMode
+
 	// Split pane state
 	previewPane        *EmailView
 	previewedUID       uint32
@@ -143,6 +146,11 @@ func (m *FolderInbox) SetDetailedDates(enabled bool) {
 	if m.inbox != nil {
 		m.inbox.SetDetailedDates(enabled)
 	}
+}
+
+// SetLayout updates the split layout mode.
+func (m *FolderInbox) SetLayout(layout config.LayoutMode) {
+	m.layout = layout
 }
 
 // SetDefaultThreaded propagates the global default threading toggle.
