@@ -499,6 +499,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cachedFolders = append([]string{"INBOX"}, cachedFolders...)
 		}
 		m.folderInbox = tui.NewFolderInbox(cachedFolders, m.config.Accounts)
+		m.folderInbox.SetLayout(m.config.Layout)
 		m.folderInbox.SetDateFormat(m.config.GetDateFormat())
 		m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 		m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
@@ -1097,6 +1098,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		if m.folderInbox != nil {
+			m.folderInbox.SetLayout(m.config.Layout)
 			m.folderInbox.SetDateFormat(m.config.GetDateFormat())
 			m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 			m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
