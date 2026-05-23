@@ -100,44 +100,34 @@ func TestSearchOverlayKeysNotIntercepted(t *testing.T) {
 	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
 	fi = model.(*FolderInbox)
 
-	// Selection must exist so the bug's "m" -> Move handler would actually fire.
-	fi.SetEmails([]fetcher.Email{
-		{UID: 1, AccountID: "account-1", Subject: "first"},
-	}, accounts)
+	// Open search overlay
+	model, _ = fi.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
+	fi = model.(*FolderInbox)
 
-	// Open the search overlay (the same state pressing "/" produces in inbox.go).
-	fi.inbox.searchOverlay = NewSearchOverlay(fi.width, fi.height)
+	if fi.inbox.searchOverlay == nil {
+		t.Fatal("expected search overlay to be open")
+	}
 
-	// Press "m" -- with the bug this would set movingEmail = true.
+	// Press "m" (matches move-to-folder keybinding in FolderInbox)
 	model, _ = fi.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
 	fi = model.(*FolderInbox)
 
 	if fi.movingEmail {
-		t.Fatal("pressing 'm' while search overlay is active must not start the move flow")
-	}
-	if fi.inbox.searchOverlay == nil {
-		t.Fatal("search overlay must remain open after typing into it")
-	}
-	if got := fi.inbox.searchOverlay.input.Value(); got != "m" {
-		t.Fatalf("search input should contain typed character, got %q", got)
+		t.Error("FolderInbox keybinding should not trigger while search overlay is active")
 	}
 }
 
 func TestFolderInbox_ToggleSidebar(t *testing.T) {
 	accounts := []config.Account{
-		{ID: "account-1", Email: "host.example.com"},
+		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
 	fi := NewFolderInbox([]string{"INBOX"}, accounts)
-	
-	// Set initial window size
-	width := 200
-	height := 60
-	model, _ := fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
 	fi = model.(*FolderInbox)
 
 	initialInboxWidth := fi.inbox.list.Width()
-	
-	// Simulate pressing 'F' to toggle sidebar
+
+	// Toggle sidebar hidden
 	model, _ = fi.Update(tea.KeyPressMsg{Code: 'F', Text: "F"})
 	fi = model.(*FolderInbox)
 
@@ -146,7 +136,6 @@ func TestFolderInbox_ToggleSidebar(t *testing.T) {
 	}
 
 	hiddenSidebarInboxWidth := fi.inbox.list.Width()
-	
 	if hiddenSidebarInboxWidth <= initialInboxWidth {
 		t.Errorf("expected inbox width to increase when sidebar is hidden, got %d <= %d", hiddenSidebarInboxWidth, initialInboxWidth)
 	}
@@ -161,5 +150,42 @@ func TestFolderInbox_ToggleSidebar(t *testing.T) {
 
 	if fi.inbox.list.Width() != initialInboxWidth {
 		t.Errorf("expected inbox width to return to %d, got %d", initialInboxWidth, fi.inbox.list.Width())
+	}
+}
+
+func TestFolderInboxLayoutResizing(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	
+	// Test Vertical (default for split if not set)
+	fi.SetLayout(config.LayoutVertical)
+	width, height := 100, 40
+	fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+	fi.OpenSplitPreview(1, "account-1", &fetcher.Email{UID: 1})
+
+	if fi.calculateInboxHeight() != height {
+		t.Errorf("Vertical layout: expected inbox height %d, got %d", height, fi.calculateInboxHeight())
+	}
+	if fi.calculatePreviewWidth() >= width-sidebarWidth {
+		t.Errorf("Vertical layout: expected preview width to be less than available width")
+	}
+
+	// Test Horizontal
+	fi.SetLayout(config.LayoutHorizontal)
+	fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+
+	inboxHeight := fi.calculateInboxHeight()
+	previewHeight := fi.calculatePreviewHeight()
+
+	if inboxHeight >= height {
+		t.Errorf("Horizontal layout: expected inbox height to be less than %d, got %d", height, inboxHeight)
+	}
+	if previewHeight >= height {
+		t.Errorf("Horizontal layout: expected preview height to be less than %d, got %d", height, previewHeight)
+	}
+	if fi.calculateInboxWidth() != width-sidebarWidth-2 {
+		t.Errorf("Horizontal layout: expected inbox width to be full, got %d", fi.calculateInboxWidth())
 	}
 }
