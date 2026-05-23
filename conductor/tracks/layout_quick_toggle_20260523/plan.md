@@ -2,7 +2,7 @@
 
 #### Phase 1: Configuration & Settings Integration
 - [x] Task: Add `EnableQuickToggle` boolean field to the `Config` struct in `config/config.go`. 7a8dd62
-- [ ] Task: Update serialization logic in `SaveConfig` and `LoadConfig` in `config/config.go` to handle the new field.
+- [x] Task: Update serialization logic in `SaveConfig` and `LoadConfig` in `config/config.go` to handle the new field. f93466c
 - [ ] Task: Update the settings menu in `tui/settings_general.go` to include the "Layout Quick Toggle" option.
 - [ ] Task: Implement logic in `tui/settings_general.go` to disable/force-off "Layout Quick Toggle" when "Split View" is set to Horizontal.
 - [ ] Task: Conductor - User Manual Verification 'Configuration Safety' (Protocol in workflow.md)
