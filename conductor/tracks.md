@@ -27,3 +27,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [ ] **Track: Horizontal Email Preview (No Shift+L)**
 *Link: [./tracks/horizontal_preview_20260522/](./tracks/horizontal_preview_20260522/)*
 
+---
+
+- [ ] **Track: Multi-line Email Headers**
+*Link: [./tracks/multiline_headers_20260523/](./tracks/multiline_headers_20260523/)*
+

@@ -1,0 +1,8 @@
+{
+  "track_id": "multiline_headers_20260523",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-05-23T05:00:00Z",
+  "updated_at": "2026-05-23T05:00:00Z",
+  "description": "when reading an email, separate from, to, cc, bcc, and subject into different lines, in that order. right now all is shown into a single line, enable/disable this via a setting"
+}
