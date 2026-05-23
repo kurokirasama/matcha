@@ -74,6 +74,7 @@ type FolderKeys struct {
 	Move         string `json:"move"`
 	FocusPreview string `json:"focus_preview"`
 	FocusInbox   string `json:"focus_inbox"`
+	ToggleLayout string `json:"toggle_layout"`
 }
 
 type DraftsKeys struct {
@@ -184,6 +185,7 @@ func ValidateKeybinds(kb KeybindsConfig) []string {
 		"move":          kb.Folder.Move,
 		"focus_preview": kb.Folder.FocusPreview,
 		"focus_inbox":   kb.Folder.FocusInbox,
+		"toggle_layout": kb.Folder.ToggleLayout,
 	})
 	check("drafts", map[string]string{
 		"open":   kb.Drafts.Open,

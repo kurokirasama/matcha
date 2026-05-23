@@ -84,3 +84,10 @@ func TestLoadKeybindsFromDir_ParsesCustom(t *testing.T) {
 		t.Errorf("expected inbox.delete=x, got %q", Keybinds.Inbox.Delete)
 	}
 }
+
+func TestDefaultKeybinds_ToggleLayout(t *testing.T) {
+	kb := defaultKeybinds()
+	if kb.Folder.ToggleLayout == "" {
+		t.Error("expected folder.toggle_layout to be set in default keybinds")
+	}
+}
