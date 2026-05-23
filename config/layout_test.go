@@ -84,3 +84,49 @@ func TestConfigLayoutRoundTrip(t *testing.T) {
 		t.Errorf("Loaded layout = %s, want %s", loadedConfig.Layout, expectedConfig.Layout)
 	}
 }
+
+func TestConfigIntegrityWithLayout(t *testing.T) {
+	keyring.MockInit()
+	tempDir := t.TempDir()
+	t.Setenv("HOME", tempDir)
+
+	expectedConfig := &Config{
+		Accounts: []Account{
+			{
+				ID:    "test-id",
+				Email: "test@example.com",
+				Name:  "Test User",
+			},
+		},
+		DisableImages:        true,
+		HideTips:             true,
+		Layout:               LayoutVertical,
+		Theme:                "nord",
+		DisableNotifications: true,
+	}
+
+	if err := SaveConfig(expectedConfig); err != nil {
+		t.Fatalf("SaveConfig failed: %v", err)
+	}
+
+	loadedConfig, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("LoadConfig failed: %v", err)
+	}
+
+	if loadedConfig.DisableImages != expectedConfig.DisableImages {
+		t.Errorf("DisableImages lost")
+	}
+	if loadedConfig.HideTips != expectedConfig.HideTips {
+		t.Errorf("HideTips lost")
+	}
+	if loadedConfig.Layout != expectedConfig.Layout {
+		t.Errorf("Layout lost")
+	}
+	if loadedConfig.Theme != expectedConfig.Theme {
+		t.Errorf("Theme lost")
+	}
+	if loadedConfig.DisableNotifications != expectedConfig.DisableNotifications {
+		t.Errorf("DisableNotifications lost")
+	}
+}
