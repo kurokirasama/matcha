@@ -4,7 +4,7 @@
 - [x] Task: Define `LayoutMode` type and constants (Off, Vertical, Horizontal) in `config/config.go`. 669849c
 - [x] Task: Add `Layout` field to `Config` struct using a strictly additive approach. ca4ee5b
 - [x] Task: Update serialization logic to ensure all existing fields are preserved during save/load. 1ec68d7
-- [ ] Task: Add regression tests for config persistence to prevent data loss.
+- [x] Task: Add regression tests for config persistence to prevent data loss. e17e428
 - [ ] Task: Conductor - User Manual Verification 'Config Safety' (Protocol in workflow.md)
 
 ## Phase 2: TUI Refactor & Layout Engine
