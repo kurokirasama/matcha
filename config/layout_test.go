@@ -36,3 +36,23 @@ func TestLayoutModeSerialization(t *testing.T) {
 		})
 	}
 }
+
+func TestConfigLayoutField(t *testing.T) {
+	c := Config{
+		Layout: LayoutHorizontal,
+	}
+
+	data, err := json.Marshal(c)
+	if err != nil {
+		t.Fatalf("Marshal failed: %v", err)
+	}
+
+	var decoded Config
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		t.Fatalf("Unmarshal failed: %v", err)
+	}
+
+	if decoded.Layout != LayoutHorizontal {
+		t.Errorf("Decoded layout = %s, want %s", decoded.Layout, LayoutHorizontal)
+	}
+}
