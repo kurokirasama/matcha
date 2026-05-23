@@ -2,7 +2,7 @@
 
 ## Phase 1: Robust Configuration Extension
 - [x] Task: Define `LayoutMode` type and constants (Off, Vertical, Horizontal) in `config/config.go`. 669849c
-- [ ] Task: Add `Layout` field to `Config` struct using a strictly additive approach.
+- [x] Task: Add `Layout` field to `Config` struct using a strictly additive approach. ca4ee5b
 - [ ] Task: Update serialization logic to ensure all existing fields are preserved during save/load.
 - [ ] Task: Add regression tests for config persistence to prevent data loss.
 - [ ] Task: Conductor - User Manual Verification 'Config Safety' (Protocol in workflow.md)
