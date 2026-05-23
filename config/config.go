@@ -433,6 +433,7 @@ type secureDiskConfig struct {
 	DisableImages        bool                              `json:"disable_images,omitempty"`
 	HideTips             bool                              `json:"hide_tips,omitempty"`
 	Layout               LayoutMode                        `json:"layout,omitempty"`
+	EnableQuickToggle    bool                              `json:"enable_quick_toggle,omitempty"`
 	DisableNotifications bool                              `json:"disable_notifications,omitempty"`
 	EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 	EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
@@ -482,6 +483,7 @@ func SaveConfig(config *Config) error {
 			DisableImages:        config.DisableImages,
 			HideTips:             config.HideTips,
 			Layout:               config.Layout,
+			EnableQuickToggle:    config.EnableQuickToggle,
 			DisableNotifications: config.DisableNotifications,
 			EnableSplitPane:      config.EnableSplitPane,
 			EnableThreaded:       config.EnableThreaded,
@@ -587,6 +589,7 @@ func LoadConfig() (*Config, error) {
 		DisableImages        bool                              `json:"disable_images,omitempty"`
 		HideTips             bool                              `json:"hide_tips,omitempty"`
 		Layout               LayoutMode                        `json:"layout,omitempty"`
+	EnableQuickToggle    bool                              `json:"enable_quick_toggle,omitempty"`
 		DisableNotifications bool                              `json:"disable_notifications,omitempty"`
 		EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 		EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
@@ -628,6 +631,7 @@ func LoadConfig() (*Config, error) {
 	config.DisableImages = raw.DisableImages
 	config.HideTips = raw.HideTips
 	config.Layout = raw.Layout
+	config.EnableQuickToggle = raw.EnableQuickToggle
 	config.DisableNotifications = raw.DisableNotifications
 	config.EnableSplitPane = raw.EnableSplitPane
 	config.EnableThreaded = raw.EnableThreaded
