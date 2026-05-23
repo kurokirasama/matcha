@@ -617,6 +617,9 @@ type LanguageChangedMsg struct{}
 // consumers (notably the daemon) should reload it.
 type ConfigSavedMsg struct{}
 
+// ToggleLayoutMsg signals a request to cycle the layout mode via shortcut.
+type ToggleLayoutMsg struct{}
+
 type RSVPResultMsg struct {
 	Err       error
 	Response  string // "ACCEPTED", "DECLINED", "TENTATIVE"

@@ -500,6 +500,8 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.folderInbox = tui.NewFolderInbox(cachedFolders, m.config.Accounts)
 		m.folderInbox.SetLayout(m.config.Layout)
+		m.folderInbox.SetSplitActive(m.config.SplitActive)
+		m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
 		m.folderInbox.SetDateFormat(m.config.GetDateFormat())
 		m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 		m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
@@ -1099,10 +1101,24 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if m.folderInbox != nil {
 			m.folderInbox.SetLayout(m.config.Layout)
-			m.folderInbox.SetDateFormat(m.config.GetDateFormat())
+			m.folderInbox.SetSplitActive(m.config.SplitActive)
+		m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
+		m.folderInbox.SetDateFormat(m.config.GetDateFormat())
+
 			m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 			m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
 			m.folderInbox.SetDisableImages(m.config.DisableImages)
+		}
+		return m, nil
+
+	case tui.ToggleLayoutMsg:
+		m.config.SplitActive = !m.config.SplitActive
+		if err := config.SaveConfig(m.config); err != nil {
+			log.Printf("save config: %v", err)
+		}
+		if m.folderInbox != nil {
+			m.folderInbox.SetSplitActive(m.config.SplitActive)
+		m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
 		}
 		return m, nil
 

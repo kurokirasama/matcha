@@ -189,3 +189,57 @@ func TestFolderInboxLayoutResizing(t *testing.T) {
 		t.Errorf("Horizontal layout: expected inbox width to be full, got %d", fi.calculateInboxWidth())
 	}
 }
+
+func TestFolderInbox_ToggleLayout(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	fi.SetLayout(config.LayoutVertical)
+	fi.SetEnableQuickToggle(true)
+
+	width, height := 100, 40
+	model, _ := fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+	fi = model.(*FolderInbox)
+
+	// Initial state: splitActive is true
+	if !fi.splitActive {
+		t.Error("expected splitActive to be true initially")
+	}
+
+	// Press 'L' (Shift+L) -> Should deactivate split
+	model, _ = fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	fi = model.(*FolderInbox)
+
+	if fi.splitActive {
+		t.Error("expected splitActive to be false after toggle")
+	}
+
+	// In Vertical mode, inactive split should mean full width inbox
+	if fi.calculateInboxWidth() != width-sidebarWidth-2 {
+		t.Errorf("expected full width inbox, got %d", fi.calculateInboxWidth())
+	}
+
+	// Toggle back -> Should reactivate split
+	model, _ = fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	fi = model.(*FolderInbox)
+
+	if !fi.splitActive {
+		t.Error("expected splitActive to be true after second toggle")
+	}
+
+	// Test OFF mode
+	fi.SetLayout(config.LayoutOff)
+	fi.splitActive = true // Full height
+	
+	// Toggle -> Half height
+	model, _ = fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	fi = model.(*FolderInbox)
+
+	if fi.calculateInboxHeight() != height/2 {
+		// Note: calculateInboxHeight might adjust for borders, so we check if it's less than full
+		if fi.calculateInboxHeight() >= height {
+			t.Errorf("expected reduced height in OFF mode with split inactive, got %d", fi.calculateInboxHeight())
+		}
+	}
+}

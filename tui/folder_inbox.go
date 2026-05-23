@@ -105,6 +105,12 @@ type FolderInbox struct {
 	// Layout orientation
 	layout config.LayoutMode
 
+	// Whether the quick toggle (Shift+L) is enabled in settings
+	enableQuickToggle bool
+
+	// Whether the split is currently active (toggled via Shift+L)
+	splitActive bool
+
 	// Split pane state
 	previewPane        *EmailView
 	previewedUID       uint32
@@ -153,6 +159,16 @@ func (m *FolderInbox) SetLayout(layout config.LayoutMode) {
 	m.layout = layout
 }
 
+// SetEnableQuickToggle updates whether the quick toggle is enabled.
+func (m *FolderInbox) SetEnableQuickToggle(enabled bool) {
+	m.enableQuickToggle = enabled
+}
+
+// SetSplitActive updates whether the split is active.
+func (m *FolderInbox) SetSplitActive(active bool) {
+	m.splitActive = active
+}
+
 // SetDefaultThreaded propagates the global default threading toggle.
 func (m *FolderInbox) SetDefaultThreaded(v bool) {
 	if m.inbox != nil {
@@ -183,6 +199,7 @@ func NewFolderInbox(folders []string, accounts []config.Account) *FolderInbox {
 		currentFolder:   currentFolder,
 		inbox:           inbox,
 		accounts:        accounts,
+		splitActive:     true,
 	}
 	fi.updateHelpKeys()
 	return fi
@@ -287,8 +304,15 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.hideSidebar = !m.hideSidebar
 			// Trigger a recalculation of dimensions
 			return m.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
+		case kb.Folder.ToggleLayout:
+			if m.layout != config.LayoutHorizontal && m.enableQuickToggle {
+				m.splitActive = !m.splitActive
+				return m, tea.Batch(
+					func() tea.Msg { return ToggleLayoutMsg{} },
+					func() tea.Msg { return tea.WindowSizeMsg{Width: m.width, Height: m.height} },
+				)
+			}
 		}
-
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -296,10 +320,17 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Recalculate pane widths for split mode
 			inboxWidth := m.calculateInboxWidth()
 			previewWidth := m.calculatePreviewWidth()
-			m.inbox.SetSize(inboxWidth-2, msg.Height)
+			
+			// In horizontal mode, we use calculateInboxHeight
+			ih := msg.Height
+			if m.layout == config.LayoutHorizontal {
+				ih = m.calculateInboxHeight()
+			}
+			
+			m.inbox.SetSize(inboxWidth-2, ih)
 			if m.previewPane != nil {
 				// Forward resize to EmailView with preview pane dimensions
-				previewMsg := tea.WindowSizeMsg{Width: previewWidth - 2, Height: msg.Height - 2}
+				previewMsg := tea.WindowSizeMsg{Width: previewWidth - 2, Height: m.calculatePreviewHeight() - 2}
 				m.previewPane.Update(previewMsg)
 			}
 		} else {
@@ -312,9 +343,14 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if inboxWidth < 20 {
 				inboxWidth = 20
 			}
-			m.inbox.SetSize(inboxWidth, msg.Height)
+			h := msg.Height
+			if m.layout == config.LayoutOff && !m.splitActive {
+				h = msg.Height / 2
+			}
+			m.inbox.SetSize(inboxWidth, h)
 		}
 		return m, nil
+
 
 	case FolderEmailsFetchedMsg:
 		// Ignore stale responses for folders the user has navigated away from
@@ -543,10 +579,18 @@ func (m *FolderInbox) View() tea.View {
 				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, rightSide)
 			}
 		} else {
-			if m.hideSidebar {
-				content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, previewPane)
+			if m.splitActive {
+				if m.hideSidebar {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, previewPane)
+				} else {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+				}
 			} else {
-				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+				if m.hideSidebar {
+					content = inboxPane
+				} else {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane)
+				}
 			}
 		}
 	} else if m.previewedUID != 0 {
@@ -562,10 +606,18 @@ func (m *FolderInbox) View() tea.View {
 				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, rightSide)
 			}
 		} else {
-			if m.hideSidebar {
-				content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, emptyPreview)
+			if m.splitActive {
+				if m.hideSidebar {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, emptyPreview)
+				} else {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+				}
 			} else {
-				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+				if m.hideSidebar {
+					content = inboxPane
+				} else {
+					content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane)
+				}
 			}
 		}
 	} else {
@@ -988,6 +1040,10 @@ func (m *FolderInbox) calculateInboxWidth() int {
 		return m.width - sw - 2
 	}
 
+	if m.layout == config.LayoutVertical && !m.splitActive {
+		return m.width - sw - 2
+	}
+
 	remainingWidth := m.width - sw - 4
 	inboxWidth := int(float64(remainingWidth) * 0.4)
 	if inboxWidth < 30 {
@@ -1004,6 +1060,9 @@ func (m *FolderInbox) calculateInboxHeight() int {
 			h = 10
 		}
 		return h
+	}
+	if m.layout == config.LayoutOff && !m.splitActive {
+		return m.height / 2
 	}
 	return m.height
 }

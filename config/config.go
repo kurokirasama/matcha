@@ -110,6 +110,7 @@ type Config struct {
 	HideTips             bool          `json:"hide_tips,omitempty"`
 	Layout               LayoutMode    `json:"layout,omitempty"`
 	EnableQuickToggle    bool          `json:"enable_quick_toggle,omitempty"`
+	SplitActive          bool          `json:"split_active,omitempty"`
 
 	DisableNotifications bool          `json:"disable_notifications,omitempty"`
 	EnableSplitPane      bool          `json:"enable_split_pane,omitempty"`
@@ -434,6 +435,7 @@ type secureDiskConfig struct {
 	HideTips             bool                              `json:"hide_tips,omitempty"`
 	Layout               LayoutMode                        `json:"layout,omitempty"`
 	EnableQuickToggle    bool                              `json:"enable_quick_toggle,omitempty"`
+	SplitActive          bool                              `json:"split_active,omitempty"`
 	DisableNotifications bool                              `json:"disable_notifications,omitempty"`
 	EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 	EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
@@ -484,6 +486,7 @@ func SaveConfig(config *Config) error {
 			HideTips:             config.HideTips,
 			Layout:               config.Layout,
 			EnableQuickToggle:    config.EnableQuickToggle,
+			SplitActive:          config.SplitActive,
 			DisableNotifications: config.DisableNotifications,
 			EnableSplitPane:      config.EnableSplitPane,
 			EnableThreaded:       config.EnableThreaded,
@@ -590,6 +593,7 @@ func LoadConfig() (*Config, error) {
 		HideTips             bool                              `json:"hide_tips,omitempty"`
 		Layout               LayoutMode                        `json:"layout,omitempty"`
 	EnableQuickToggle    bool                              `json:"enable_quick_toggle,omitempty"`
+	SplitActive          bool                              `json:"split_active,omitempty"`
 		DisableNotifications bool                              `json:"disable_notifications,omitempty"`
 		EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 		EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
@@ -632,6 +636,7 @@ func LoadConfig() (*Config, error) {
 	config.HideTips = raw.HideTips
 	config.Layout = raw.Layout
 	config.EnableQuickToggle = raw.EnableQuickToggle
+	config.SplitActive = raw.SplitActive
 	config.DisableNotifications = raw.DisableNotifications
 	config.EnableSplitPane = raw.EnableSplitPane
 	config.EnableThreaded = raw.EnableThreaded
