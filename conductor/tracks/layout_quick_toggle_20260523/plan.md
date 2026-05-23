@@ -5,7 +5,8 @@
 - [x] Task: Update serialization logic in `SaveConfig` and `LoadConfig` in `config/config.go` to handle the new field. f93466c
 - [x] Task: Update the settings menu in `tui/settings_general.go` to include the "Layout Quick Toggle" option. 923ac91
 - [x] Task: Implement logic in `tui/settings_general.go` to disable/force-off "Layout Quick Toggle" when "Split View" is set to Horizontal. 7c5caea
-- [ ] Task: Conductor - User Manual Verification 'Configuration Safety' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Configuration Safety' (Protocol in workflow.md)
+[checkpoint: e9db627]
 
 #### Phase 2: Keybinding & TUI Logic
 - [ ] Task: Define the `Shift+L` keybinding in `tui/keys.go` (if not already present).
