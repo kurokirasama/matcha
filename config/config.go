@@ -109,6 +109,7 @@ type Config struct {
 	DisableImages        bool          `json:"disable_images,omitempty"`
 	HideTips             bool          `json:"hide_tips,omitempty"`
 	Layout               LayoutMode    `json:"layout,omitempty"`
+	EnableQuickToggle    bool          `json:"enable_quick_toggle,omitempty"`
 
 	DisableNotifications bool          `json:"disable_notifications,omitempty"`
 	EnableSplitPane      bool          `json:"enable_split_pane,omitempty"`
