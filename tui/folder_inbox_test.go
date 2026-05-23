@@ -243,3 +243,21 @@ func TestFolderInbox_ToggleLayout(t *testing.T) {
 		}
 	}
 }
+
+func TestFolderInbox_ToggleLayout_DisabledInHorizontal(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	fi.SetLayout(config.LayoutHorizontal)
+	fi.SetEnableQuickToggle(true)
+	fi.splitActive = true
+
+	// Toggle Shift+L
+	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	
+	// Should NOT change splitActive in Horizontal mode
+	if !fi.splitActive {
+		t.Error("expected splitActive to remain true in Horizontal mode")
+	}
+}
