@@ -1,0 +1,8 @@
+{
+  "track_id": "detailed_notifications_20260523",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-05-23T06:30:00Z",
+  "updated_at": "2026-05-23T06:30:00Z",
+  "description": "make it so notifications when a new email arrives show \"from\" and \"subject\", not the generic message it shows now, enable/disable this via a setting"
+}
