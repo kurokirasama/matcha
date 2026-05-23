@@ -31,6 +31,15 @@ const (
 	DateFormatEU  = "DD/MM/YYYY HH:MM"
 )
 
+// LayoutMode defines the orientation of the email preview pane.
+type LayoutMode string
+
+const (
+	LayoutOff        LayoutMode = "off"
+	LayoutVertical   LayoutMode = "vertical"
+	LayoutHorizontal LayoutMode = "horizontal"
+)
+
 type SessionCache struct {
 	once  sync.Once
 	cache tls.ClientSessionCache
