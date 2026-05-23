@@ -4,12 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-
----
-
-
----
-
 - [ ] **Track: Recipient Summary & Toggle (v)**
 *Link: [./tracks/recipient_summary_toggle_20260521/](./tracks/recipient_summary_toggle_20260521/)*
 
@@ -29,4 +23,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 *Link: [./tracks/interactive_send_hooks_20260521/](./tracks/interactive_send_hooks_20260521/)*
 
 ---
+
+- [ ] **Track: Horizontal Email Preview (No Shift+L)**
+*Link: [./tracks/horizontal_preview_20260522/](./tracks/horizontal_preview_20260522/)*
 
