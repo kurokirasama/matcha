@@ -32,3 +32,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [ ] **Track: Multi-line Email Headers**
 *Link: [./tracks/multiline_headers_20260523/](./tracks/multiline_headers_20260523/)*
 
+---
+
+- [ ] **Track: Composer Quick Keys (Esc Modal)**
+*Link: [./tracks/composer_quick_keys_20260523/](./tracks/composer_quick_keys_20260523/)*
+
