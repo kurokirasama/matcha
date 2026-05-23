@@ -119,6 +119,13 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 					m.cfg.EnableQuickToggle = !m.cfg.EnableQuickToggle
 					_ = config.SaveConfig(m.cfg)
 					saved = true
+				} else {
+					return m, func() tea.Msg {
+						return PluginNotifyMsg{
+							Message:  t("settings_general.quick_toggle_unavailable_horizontal"),
+							Duration: 2,
+						}
+					}
 				}
 			case 5: // Threaded Conversation View
 				m.cfg.EnableThreaded = !m.cfg.EnableThreaded

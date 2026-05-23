@@ -620,6 +620,12 @@ type ConfigSavedMsg struct{}
 // ToggleLayoutMsg signals a request to cycle the layout mode via shortcut.
 type ToggleLayoutMsg struct{}
 
+// ToastMsg signals a transient notification message.
+type ToastMsg struct {
+	Message string
+	Level   string // "info", "success", "warning", "error"
+}
+
 type RSVPResultMsg struct {
 	Err       error
 	Response  string // "ACCEPTED", "DECLINED", "TENTATIVE"
