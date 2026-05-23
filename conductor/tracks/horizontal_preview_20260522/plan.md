@@ -13,7 +13,8 @@
 - [x] Task: Update `calculateInboxWidth`, `calculateInboxHeight`, `calculatePreviewWidth`, and `calculatePreviewHeight` in `tui/folder_inbox.go` to be layout-aware. ca5aeff
 - [x] Task: Add `rowOffset` and `columnOffset` support to `EmailView` in `tui/email_view.go` for proper image rendering in both horizontal and vertical modes. 265de84
 - [x] Task: Write unit tests in `tui/folder_inbox_test.go` to verify window resizing. f318dc3
-- [ ] Task: Conductor - User Manual Verification 'Layout Rendering' (Protocol in workflow.md)
+- [x] Conductor - User Manual Verification 'Layout Rendering' (Protocol in workflow.md)
+[checkpoint: c2d0640]
 
 ## Phase 3: Settings Menu Integration
 - [ ] Task: Update the settings TUI in `tui/settings_general.go` to include the "Split View" choice menu, with localized labels.
