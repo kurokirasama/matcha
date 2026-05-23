@@ -1,0 +1,8 @@
+{
+  "track_id": "horizontal_preview_20260522",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-05-22T21:10:00Z",
+  "updated_at": "2026-05-22T21:10:00Z",
+  "description": "bring back only the horizontal preview of the deleted track, its latest version, not the shift+l functionality"
+}
