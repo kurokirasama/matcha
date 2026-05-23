@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/zalando/go-keyring"
 )
 
 func TestLayoutModeSerialization(t *testing.T) {
@@ -54,5 +56,31 @@ func TestConfigLayoutField(t *testing.T) {
 
 	if decoded.Layout != LayoutHorizontal {
 		t.Errorf("Decoded layout = %s, want %s", decoded.Layout, LayoutHorizontal)
+	}
+}
+
+func TestConfigLayoutRoundTrip(t *testing.T) {
+	keyring.MockInit()
+	tempDir := t.TempDir()
+	t.Setenv("HOME", tempDir)
+
+	expectedConfig := &Config{
+		Accounts: []Account{
+			{ID: "test", Email: "test@example.com"},
+		},
+		Layout: LayoutHorizontal,
+	}
+
+	if err := SaveConfig(expectedConfig); err != nil {
+		t.Fatalf("SaveConfig failed: %v", err)
+	}
+
+	loadedConfig, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("LoadConfig failed: %v", err)
+	}
+
+	if loadedConfig.Layout != expectedConfig.Layout {
+		t.Errorf("Loaded layout = %s, want %s", loadedConfig.Layout, expectedConfig.Layout)
 	}
 }
