@@ -11,7 +11,7 @@
 ## Phase 2: TUI Refactor & Layout Engine
 - [x] Task: Modify `FolderInbox` model in `tui/folder_inbox.go` to handle dynamic split orientation. 8ad71eb
 - [x] Task: Update `calculateInboxWidth`, `calculateInboxHeight`, `calculatePreviewWidth`, and `calculatePreviewHeight` in `tui/folder_inbox.go` to be layout-aware. ca5aeff
-- [ ] Task: Add `rowOffset` and `columnOffset` support to `EmailView` in `tui/email_view.go` for proper image rendering in both horizontal and vertical modes.
+- [x] Task: Add `rowOffset` and `columnOffset` support to `EmailView` in `tui/email_view.go` for proper image rendering in both horizontal and vertical modes. 265de84
 - [ ] Task: Write unit tests in `tui/folder_inbox_test.go` to verify window resizing.
 - [ ] Task: Conductor - User Manual Verification 'Layout Rendering' (Protocol in workflow.md)
 
