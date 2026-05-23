@@ -17,12 +17,25 @@ type generalOption struct {
 	accountID    string
 }
 
+func getLayoutLabel(mode config.LayoutMode) string {
+	switch mode {
+	case config.LayoutOff:
+		return t("settings_general.split_view_off")
+	case config.LayoutVertical:
+		return t("settings_general.split_view_vertical")
+	case config.LayoutHorizontal:
+		return t("settings_general.split_view_horizontal")
+	default:
+		return t("settings_general.split_view_off")
+	}
+}
+
 func (m *Settings) buildGeneralOptions() []generalOption {
 	opts := []generalOption{
 		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, ""},
 		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, ""},
 		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, ""},
-		{"settings_general.enable_split_pane", onOff(m.cfg.EnableSplitPane), "View inbox and email side-by-side.", false, ""},
+		{"settings_general.split_view", getLayoutLabel(m.cfg.Layout), "Orientation of the email preview pane.", false, ""},
 		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, ""},
 		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, ""},
 		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, ""},
@@ -80,8 +93,21 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				m.cfg.DisableNotifications = !m.cfg.DisableNotifications
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 3: // Split Pane View
-				m.cfg.EnableSplitPane = !m.cfg.EnableSplitPane
+			case 3: // Split View
+				switch m.cfg.Layout {
+				case config.LayoutOff:
+					m.cfg.Layout = config.LayoutVertical
+					m.cfg.EnableSplitPane = true
+				case config.LayoutVertical:
+					m.cfg.Layout = config.LayoutHorizontal
+					m.cfg.EnableSplitPane = true
+				case config.LayoutHorizontal:
+					m.cfg.Layout = config.LayoutOff
+					m.cfg.EnableSplitPane = false
+				default:
+					m.cfg.Layout = config.LayoutOff
+					m.cfg.EnableSplitPane = false
+				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
 			case 4: // Threaded Conversation View
