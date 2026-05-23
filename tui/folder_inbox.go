@@ -887,6 +887,11 @@ func (m *FolderInbox) calculatePreviewWidth() int {
 	if m.hideSidebar {
 		sw = 0
 	}
+
+	if m.layout == config.LayoutHorizontal {
+		return m.width - sw - 2
+	}
+
 	remainingWidth := m.width - sw - 4 // 4 for borders
 	inboxWidth := int(float64(remainingWidth) * 0.4)
 	if inboxWidth < 30 {
@@ -899,16 +904,45 @@ func (m *FolderInbox) calculatePreviewWidth() int {
 	return previewWidth
 }
 
+// calculatePreviewHeight calculates height for preview pane
+func (m *FolderInbox) calculatePreviewHeight() int {
+	if m.layout == config.LayoutHorizontal {
+		h := m.height / 2
+		if h < 10 {
+			h = 10
+		}
+		return h
+	}
+	return m.height
+}
+
 // calculateInboxWidth calculates width for inbox pane in split mode
 func (m *FolderInbox) calculateInboxWidth() int {
 	sw := sidebarWidth
 	if m.hideSidebar {
 		sw = 0
 	}
+
+	if m.layout == config.LayoutHorizontal {
+		return m.width - sw - 2
+	}
+
 	remainingWidth := m.width - sw - 4
 	inboxWidth := int(float64(remainingWidth) * 0.4)
 	if inboxWidth < 30 {
 		inboxWidth = 30
 	}
 	return inboxWidth
+}
+
+// calculateInboxHeight calculates height for inbox pane in split mode
+func (m *FolderInbox) calculateInboxHeight() int {
+	if m.layout == config.LayoutHorizontal {
+		h := m.height - m.calculatePreviewHeight() - 1
+		if h < 10 {
+			h = 10
+		}
+		return h
+	}
+	return m.height
 }
