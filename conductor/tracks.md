@@ -10,11 +10,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Inbox Layout Refactor & Horizontal Preview (L)**
-*Link: [./tracks/inbox_layout_refactor_20260521/](./tracks/inbox_layout_refactor_20260521/)*
-
----
-
 - [ ] **Track: Recipient Summary & Toggle (v)**
 *Link: [./tracks/recipient_summary_toggle_20260521/](./tracks/recipient_summary_toggle_20260521/)*
 
