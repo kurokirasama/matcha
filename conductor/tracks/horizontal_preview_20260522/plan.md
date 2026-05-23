@@ -1,7 +1,7 @@
 # Implementation Plan: Horizontal Email Preview
 
 ## Phase 1: Robust Configuration Extension
-- [ ] Task: Define `LayoutMode` type and constants (Off, Vertical, Horizontal) in `config/config.go`.
+- [x] Task: Define `LayoutMode` type and constants (Off, Vertical, Horizontal) in `config/config.go`. 669849c
 - [ ] Task: Add `Layout` field to `Config` struct using a strictly additive approach.
 - [ ] Task: Update serialization logic to ensure all existing fields are preserved during save/load.
 - [ ] Task: Add regression tests for config persistence to prevent data loss.
