@@ -32,3 +32,6 @@
 - [x] Task: Refactor `FolderInbox.View` to keep sidebar full-height in horizontal mode.
 - [x] Task: Correct `columnOffset` for images in horizontal preview mode.
 - [x] Task: Conductor - User Manual Verification 'Refined Layout' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions b82b9d3
