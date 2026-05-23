@@ -10,10 +10,10 @@
 
 #### Phase 2: Keybinding & TUI Logic
 - [x] Task: Define the `Shift+L` keybinding in `tui/keys.go` (if not already present). 47a65d3
-- [ ] Task: Modify `FolderInbox.Update` in `tui/folder_inbox.go` to handle the `Shift+L` message.
-- [ ] Task: Implement the layout cycling logic in `FolderInbox` based on the current `m.layout` and `m.config.EnableQuickToggle`.
-- [ ] Task: Add a new message type `ToggleLayoutMsg` (or similar) to notify the main model when the layout is changed via shortcut.
-- [ ] Task: Update `main.go` to handle layout changes from `FolderInbox`, update the config, and save to disk.
+- [x] Task: Modify `FolderInbox.Update` in `tui/folder_inbox.go` to handle the `Shift+L` message. bd735a4
+- [x] Task: Implement the layout cycling logic in `FolderInbox` based on the current `m.layout` and `m.config.EnableQuickToggle`. bd735a4
+- [x] Task: Add a new message type `ToggleLayoutMsg` (or similar) to notify the main model when the layout is changed via shortcut. bd735a4
+- [x] Task: Update `main.go` to handle layout changes from `FolderInbox`, update the config, and save to disk. bd735a4
 - [ ] Task: Conductor - User Manual Verification 'Shortcut Interaction' (Protocol in workflow.md)
 
 #### Phase 3: Validation & Polish
