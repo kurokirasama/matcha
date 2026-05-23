@@ -534,19 +534,39 @@ func (m *FolderInbox) View() tea.View {
 		// Three-pane layout: folders | inbox | email preview
 		inboxPane := m.renderInboxPane()
 		previewPane := m.renderPreviewPane()
-		if m.hideSidebar {
-			content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, previewPane)
+
+		if m.layout == config.LayoutHorizontal {
+			rightSide := lipgloss.JoinVertical(lipgloss.Left, inboxPane, previewPane)
+			if m.hideSidebar {
+				content = rightSide
+			} else {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, rightSide)
+			}
 		} else {
-			content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+			if m.hideSidebar {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, previewPane)
+			} else {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, previewPane)
+			}
 		}
 	} else if m.previewedUID != 0 {
 		// Split pane loading state (body being fetched)
 		inboxPane := m.renderInboxPane()
 		emptyPreview := m.renderEmptyPreview()
-		if m.hideSidebar {
-			content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, emptyPreview)
+
+		if m.layout == config.LayoutHorizontal {
+			rightSide := lipgloss.JoinVertical(lipgloss.Left, inboxPane, emptyPreview)
+			if m.hideSidebar {
+				content = rightSide
+			} else {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, rightSide)
+			}
 		} else {
-			content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+			if m.hideSidebar {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, inboxPane, emptyPreview)
+			} else {
+				content = lipgloss.JoinHorizontal(lipgloss.Top, sidebar, inboxPane, emptyPreview)
+			}
 		}
 	} else {
 		// Two-pane layout (original): folders | inbox
@@ -782,6 +802,7 @@ func folderInboxTitle(folder string) string {
 // renderInboxPane renders inbox with border for split pane mode
 func (m *FolderInbox) renderInboxPane() string {
 	inboxWidth := m.calculateInboxWidth()
+	inboxHeight := m.calculateInboxHeight()
 
 	borderColor := unfocusedBorderColor
 	if m.focusedPane == FocusInbox {
@@ -791,9 +812,17 @@ func (m *FolderInbox) renderInboxPane() string {
 	paneStyle := inboxPaneStyle.
 		BorderForeground(borderColor).
 		Width(inboxWidth).
-		Height(m.height)
+		Height(inboxHeight)
 
-	m.inbox.SetSize(inboxWidth-2, m.height)
+	if m.layout == config.LayoutHorizontal {
+		paneStyle = paneStyle.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderRight(false).
+			BorderBottom(true).
+			PaddingRight(0)
+	}
+
+	m.inbox.SetSize(inboxWidth-2, inboxHeight)
 	return paneStyle.Render(m.inbox.View().Content)
 }
 
@@ -804,6 +833,7 @@ func (m *FolderInbox) renderPreviewPane() string {
 	}
 
 	previewWidth := m.calculatePreviewWidth()
+	previewHeight := m.calculatePreviewHeight()
 
 	borderColor := unfocusedBorderColor
 	if m.focusedPane == FocusPreview {
@@ -813,7 +843,30 @@ func (m *FolderInbox) renderPreviewPane() string {
 	paneStyle := previewPaneStyle.
 		BorderForeground(borderColor).
 		Width(previewWidth).
-		Height(m.height)
+		Height(previewHeight)
+
+	if m.layout == config.LayoutHorizontal {
+		paneStyle = paneStyle.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderLeft(false).
+			PaddingLeft(0)
+
+		// Set offsets for image rendering
+		rowOffset := m.calculateInboxHeight() + 1
+		colOffset := sidebarWidth
+		if m.hideSidebar {
+			colOffset = 0
+		}
+		m.previewPane.SetOffsets(rowOffset, colOffset)
+	} else {
+		// Vertical mode offsets
+		colOffset := sidebarWidth
+		if m.hideSidebar {
+			colOffset = 0
+		}
+		colOffset += m.calculateInboxWidth() + 1
+		m.previewPane.SetOffsets(0, colOffset)
+	}
 
 	return paneStyle.Render(m.previewPane.View().Content)
 }
@@ -821,12 +874,20 @@ func (m *FolderInbox) renderPreviewPane() string {
 // renderEmptyPreview renders placeholder when no email selected
 func (m *FolderInbox) renderEmptyPreview() string {
 	previewWidth := m.calculatePreviewWidth()
+	previewHeight := m.calculatePreviewHeight()
 
 	emptyStyle := lipgloss.NewStyle().
 		Width(previewWidth).
-		Height(m.height).
+		Height(previewHeight).
 		Align(lipgloss.Center, lipgloss.Center).
 		Foreground(lipgloss.Color("240"))
+
+	if m.layout == config.LayoutHorizontal {
+		emptyStyle = emptyStyle.
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderLeft(false).
+			PaddingLeft(0)
+	}
 
 	return emptyStyle.Render("Loading...")
 }

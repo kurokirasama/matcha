@@ -491,7 +491,7 @@ func (m *Inbox) updateList() {
 		l.SetWidth(m.width)
 	}
 	if m.height > 0 {
-		l.SetHeight(m.height / 2)
+		l.SetHeight(m.calculateListHeight(m.height))
 	}
 
 	// Restore index
@@ -1074,7 +1074,7 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 		m.list.SetWidth(msg.Width)
-		m.list.SetHeight(msg.Height / 2)
+		m.list.SetHeight(m.calculateListHeight(msg.Height))
 		if m.searchOverlay != nil {
 			return m, m.searchOverlay.Update(msg, m.mailbox, m.currentAccountID)
 		}
@@ -1489,11 +1489,23 @@ func (m *Inbox) RemoveEmail(uid uint32, accountID string) {
 }
 
 // SetSize sets the width and height of the inbox, then updates the list.
+func (m *Inbox) calculateListHeight(totalHeight int) int {
+	h := totalHeight
+	if len(m.tabs) > 1 {
+		h -= 4 // tab bar + padding/margin/border
+	}
+	h -= 1 // help line
+	if h < 5 {
+		h = 5
+	}
+	return h
+}
+
 func (m *Inbox) SetSize(width, height int) {
 	m.width = width
 	m.height = height
 	m.list.SetWidth(width)
-	m.list.SetHeight(height / 2)
+	m.list.SetHeight(m.calculateListHeight(height))
 }
 
 // SetFolderName sets a custom folder name for the inbox title.
