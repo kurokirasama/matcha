@@ -18,7 +18,7 @@
 
 ## Phase 3: Settings Menu Integration
 - [x] Task: Update the settings TUI in `tui/settings_general.go` to include the "Split View" choice menu, with localized labels. 84584ea
-- [ ] Task: Implement the message handler in `main.go` to apply layout changes immediately across the application when `ConfigSavedMsg` is received.
+- [x] Task: Implement the message handler in `main.go` to apply layout changes immediately across the application when `ConfigSavedMsg` is received. dd6bea0
 - [ ] Task: Conductor - User Manual Verification 'Settings Interaction' (Protocol in workflow.md)
 
 ## Phase 4: Verification & Final Polish
