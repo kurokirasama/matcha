@@ -116,6 +116,7 @@ type Config struct {
 	EnableSplitPane      bool          `json:"enable_split_pane,omitempty"`
 	EnableThreaded       bool          `json:"enable_threaded,omitempty"`
 	EnableDetailedDates  bool          `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool        `json:"enable_enhanced_composer_exit,omitempty"`
 	Theme                string        `json:"theme,omitempty"`
 	MailingLists         []MailingList `json:"mailing_lists,omitempty"`
 	DateFormat           string        `json:"date_format,omitempty"`
@@ -440,6 +441,7 @@ type secureDiskConfig struct {
 	EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 	EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
 	EnableDetailedDates  bool                              `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
 	Theme                string                            `json:"theme,omitempty"`
 	MailingLists         []MailingList                     `json:"mailing_lists,omitempty"`
 	DateFormat           string                            `json:"date_format,omitempty"`
@@ -491,6 +493,7 @@ func SaveConfig(config *Config) error {
 			EnableSplitPane:      config.EnableSplitPane,
 			EnableThreaded:       config.EnableThreaded,
 			EnableDetailedDates:  config.EnableDetailedDates,
+			EnableEnhancedComposerExit: config.EnableEnhancedComposerExit,
 			Theme:                config.Theme,
 			MailingLists:         config.MailingLists,
 			DateFormat:           config.DateFormat,
@@ -598,6 +601,7 @@ func LoadConfig() (*Config, error) {
 		EnableSplitPane      bool                              `json:"enable_split_pane,omitempty"`
 		EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
 		EnableDetailedDates  bool                              `json:"enable_detailed_dates,omitempty"`
+		EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
 		Theme                string                            `json:"theme,omitempty"`
 		MailingLists         []MailingList                     `json:"mailing_lists,omitempty"`
 		DateFormat           string                            `json:"date_format,omitempty"`
@@ -641,6 +645,7 @@ func LoadConfig() (*Config, error) {
 	config.EnableSplitPane = raw.EnableSplitPane
 	config.EnableThreaded = raw.EnableThreaded
 	config.EnableDetailedDates = raw.EnableDetailedDates
+	config.EnableEnhancedComposerExit = raw.EnableEnhancedComposerExit
 	config.Theme = raw.Theme
 	config.MailingLists = raw.MailingLists
 	config.DateFormat = raw.DateFormat
