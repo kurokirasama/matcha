@@ -7,10 +7,10 @@
 - [x] Task: Conductor - User Manual Verification 'Config Extension' (Protocol in workflow.md) d7c1f92
 
 ## Phase 2: Settings UI Integration
-- [ ] Task: Add localization keys for `settings_general.enable_enhanced_composer_exit` in `i18n/locales/en.json` and `es.json`.
-- [ ] Task: Add a new toggle to `buildGeneralOptions()` in `tui/settings_general.go`.
-- [ ] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index.
-- [ ] Task: Conductor - User Manual Verification 'Settings UI' (Protocol in workflow.md)
+- [x] Task: Add localization keys for `settings_general.enable_enhanced_composer_exit` in `i18n/locales/en.json` and `es.json`. 0107555
+- [x] Task: Add a new toggle to `buildGeneralOptions()` in `tui/settings_general.go`. 0107555
+- [x] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index. 0107555
+- [~] Task: Conductor - User Manual Verification 'Settings UI' (Protocol in workflow.md)
 
 ## Phase 3: Composer UI Refactor
 - [ ] Task: Modify `Composer` model in `tui/composer.go` to handle the new keyboard states in the confirmation overlay.
