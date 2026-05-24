@@ -570,6 +570,62 @@ func (m *Composer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.confirmingExit {
+			cfg, _ := config.LoadConfig()
+			if cfg != nil && cfg.EnableEnhancedComposerExit {
+				switch msg.String() {
+				case "s", "S":
+					// Send logic (copied from focusSend handling)
+					if !m.canSendEmail() {
+						m.confirmingExit = false
+						return m, m.showComposerNotice(t("composer.invalid_email_fields"))
+					}
+					if !m.hasAnyRecipient() {
+						m.confirmingExit = false
+						return m, m.showComposerNotice(t("composer.recipient_required"))
+					}
+					acc := m.getSelectedAccount()
+					accountID := ""
+					if acc != nil {
+						accountID = acc.ID
+					}
+					fromOverride := ""
+					if m.isCatchAllAccount() {
+						fromOverride = m.fromInput.Value()
+					}
+					m.confirmingExit = false
+					return m, func() tea.Msg {
+						return SendEmailMsg{
+							To:              m.toInput.Value(),
+							Cc:              m.ccInput.Value(),
+							Bcc:             m.bccInput.Value(),
+							Subject:         m.subjectInput.Value(),
+							Body:            m.bodyInput.Value(),
+							AttachmentPaths: m.attachmentPaths,
+							AccountID:       accountID,
+							FromOverride:    fromOverride,
+							QuotedText:      m.quotedText,
+							InReplyTo:       m.inReplyTo,
+							References:      m.references,
+							Signature:       m.signatureInput.Value(),
+							SignSMIME:       acc != nil && acc.SMIMESignByDefault,
+							EncryptSMIME:    m.encryptSMIME,
+							SignPGP:         acc != nil && acc.PGPSignByDefault,
+						}
+					}
+				case "a", "A":
+					m.confirmingExit = false
+					return m, func() tea.Msg { return DiscardDraftMsg{ComposerState: m} }
+				case "d", "D":
+					m.confirmingExit = false
+					return m, func() tea.Msg { return BackToInboxMsg{} }
+				case "c", "C", "esc":
+					m.confirmingExit = false
+					return m, nil
+				default:
+					return m, nil
+				}
+			}
+
 			switch msg.String() {
 			case "y", "Y":
 				return m, func() tea.Msg { return DiscardDraftMsg{ComposerState: m} }
@@ -1026,6 +1082,21 @@ func (m *Composer) View() tea.View {
 	}
 
 	if m.confirmingExit {
+		cfg, _ := config.LoadConfig()
+		if cfg != nil && cfg.EnableEnhancedComposerExit {
+			dialog := DialogBoxStyle.Render(
+				lipgloss.JoinVertical(lipgloss.Center,
+					t("composer.exit_extended_prompt"),
+					"",
+					focusedStyle.Render("[s]")+blurredStyle.Render(" "+t("composer.exit_extended_send")),
+					focusedStyle.Render("[a]")+blurredStyle.Render(" "+t("composer.exit_extended_abort")),
+					focusedStyle.Render("[d]")+blurredStyle.Render(" "+t("composer.exit_extended_save")),
+					focusedStyle.Render("[c]")+blurredStyle.Render(" "+t("composer.exit_extended_cancel")),
+				),
+			)
+			return tea.NewView(lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, dialog))
+		}
+
 		dialog := DialogBoxStyle.Render(
 			lipgloss.JoinVertical(lipgloss.Center,
 				t("composer.exit_confirm"),
