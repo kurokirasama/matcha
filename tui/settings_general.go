@@ -40,6 +40,7 @@ func (m *Settings) buildGeneralOptions() []generalOption {
 		{"settings_general.layout_quick_toggle", onOff(m.cfg.EnableQuickToggle), "Enable Shift+L shortcut to cycle layout modes.", m.cfg.Layout == config.LayoutHorizontal, false, ""},
 		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, false, ""},
 		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, false, ""},
+		{"settings_general.enable_enhanced_composer_exit", onOff(m.cfg.EnableEnhancedComposerExit), "Show a rich confirmation dialog with quick keys when exiting the composer.", false, false, ""},
 		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, false, ""},
 		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, false, ""},
 		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, false, ""},
@@ -135,7 +136,11 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				m.cfg.EnableDetailedDates = !m.cfg.EnableDetailedDates
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 7: // Date Format
+			case 7: // Enhanced Composer Exit
+				m.cfg.EnableEnhancedComposerExit = !m.cfg.EnableEnhancedComposerExit
+				_ = config.SaveConfig(m.cfg)
+				saved = true
+			case 8: // Date Format
 				switch m.cfg.DateFormat {
 				case config.DateFormatEU:
 					m.cfg.DateFormat = config.DateFormatUS
@@ -146,7 +151,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 8: // Language
+			case 9: // Language
 				// Cycle through available languages
 				langs := i18n.LanguageCodes()
 				currentLang := m.cfg.GetLanguage()
@@ -167,7 +172,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 					func() tea.Msg { return ConfigSavedMsg{} },
 					func() tea.Msg { return LanguageChangedMsg{} },
 				)
-			case 9: // Edit Signature
+			case 10: // Edit Signature
 				if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
 					return m, func() tea.Msg { return GoToSignatureEditorMsg{} }
 				}
