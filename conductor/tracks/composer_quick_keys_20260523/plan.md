@@ -6,11 +6,11 @@
 - [x] Task: Write a regression test in `config/config_test.go` to ensure `EnableEnhancedComposerExit` persists correctly. d7c1f92
 - [x] Task: Conductor - User Manual Verification 'Config Extension' (Protocol in workflow.md) d7c1f92
 
-## Phase 2: Settings UI Integration
+## Phase 2: Settings UI Integration [checkpoint: a316071]
 - [x] Task: Add localization keys for `settings_general.enable_enhanced_composer_exit` in `i18n/locales/en.json` and `es.json`. 0107555
 - [x] Task: Add a new toggle to `buildGeneralOptions()` in `tui/settings_general.go`. 0107555
 - [x] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index. 0107555
-- [~] Task: Conductor - User Manual Verification 'Settings UI' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Settings UI' (Protocol in workflow.md) 0107555
 
 ## Phase 3: Composer UI Refactor
 - [ ] Task: Modify `Composer` model in `tui/composer.go` to handle the new keyboard states in the confirmation overlay.
