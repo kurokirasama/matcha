@@ -36,9 +36,3 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Detailed Email Notifications**
 *Link: [./tracks/detailed_notifications_20260523/](./tracks/detailed_notifications_20260523/)*
-
-
----
-
-- [x] **Track: Layout Quick Toggle**
-*Link: [./tracks/layout_quick_toggle_20260523/](./tracks/layout_quick_toggle_20260523/)*
