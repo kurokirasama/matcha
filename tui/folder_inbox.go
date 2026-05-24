@@ -18,8 +18,7 @@ const sidebarWidth = 25
 var (
 	sidebarStyle = lipgloss.NewStyle().
 			Width(sidebarWidth).
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderRight(true).
+			Border(lipgloss.NormalBorder(), false, true, false, false).
 			PaddingRight(1).
 			PaddingLeft(1)
 
@@ -58,13 +57,11 @@ var (
 				Bold(true)
 
 	inboxPaneStyle = lipgloss.NewStyle().
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderRight(true).
+			Border(lipgloss.NormalBorder(), false, true, false, false).
 			PaddingRight(1)
 
 	previewPaneStyle = lipgloss.NewStyle().
-				BorderStyle(lipgloss.NormalBorder()).
-				BorderLeft(true).
+				Border(lipgloss.NormalBorder(), false, false, false, true).
 				PaddingLeft(1)
 
 	focusedBorderColor   = lipgloss.Color("42")
@@ -323,15 +320,39 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			
 			// In horizontal mode, we use calculateInboxHeight
 			ih := msg.Height
+			ph := m.calculatePreviewHeight()
 			if m.layout == config.LayoutHorizontal {
 				ih = m.calculateInboxHeight()
 			}
 			
-			m.inbox.SetSize(inboxWidth-2, ih)
+			// Adjust for borders
+			iw := inboxWidth - 2 // Right border + padding
+			if m.layout == config.LayoutHorizontal {
+				iw = inboxWidth // Bottom border handled by height
+			}
+			
+			m.inbox.SetSize(iw, ih)
 			if m.previewPane != nil {
 				// Forward resize to EmailView with preview pane dimensions
-				previewMsg := tea.WindowSizeMsg{Width: previewWidth - 2, Height: m.calculatePreviewHeight() - 2}
+				pw := previewWidth - 2 // Left border + padding
+				ph_inner := ph
+				if m.layout == config.LayoutHorizontal {
+					pw = previewWidth
+					// No ph reduction as there are no top/bottom borders
+				}
+				previewMsg := tea.WindowSizeMsg{Width: pw, Height: ph_inner}
 				m.previewPane.Update(previewMsg)
+
+				// Update offsets for image rendering
+				sw := sidebarWidth
+				if m.hideSidebar {
+					sw = 0
+				}
+				if m.layout == config.LayoutHorizontal {
+					m.previewPane.SetOffsets(ih+1, sw)
+				} else {
+					m.previewPane.SetOffsets(0, sw+inboxWidth)
+				}
 			}
 		} else {
 			// Original two-pane resize
@@ -671,7 +692,7 @@ func (m *FolderInbox) renderSidebar() string {
 		sidebarHeight = 20
 	}
 
-	return sidebarStyle.Height(sidebarHeight - 2).Render(b.String())
+	return sidebarStyle.Height(sidebarHeight).MaxHeight(sidebarHeight).Render(b.String())
 }
 
 // formatFolderName makes IMAP folder names more readable.
@@ -864,17 +885,18 @@ func (m *FolderInbox) renderInboxPane() string {
 	paneStyle := inboxPaneStyle.
 		BorderForeground(borderColor).
 		Width(inboxWidth).
-		Height(inboxHeight)
+		Height(inboxHeight).
+		MaxHeight(inboxHeight)
 
+	contentHeight := inboxHeight
 	if m.layout == config.LayoutHorizontal {
 		paneStyle = paneStyle.
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderRight(false).
-			BorderBottom(true).
+			Border(lipgloss.NormalBorder(), false, false, true, false).
 			PaddingRight(0)
+		contentHeight--
 	}
 
-	m.inbox.SetSize(inboxWidth-2, inboxHeight)
+	m.inbox.SetSize(inboxWidth-2, contentHeight)
 	return paneStyle.Render(m.inbox.View().Content)
 }
 
@@ -895,29 +917,13 @@ func (m *FolderInbox) renderPreviewPane() string {
 	paneStyle := previewPaneStyle.
 		BorderForeground(borderColor).
 		Width(previewWidth).
-		Height(previewHeight)
+		Height(previewHeight).
+		MaxHeight(previewHeight)
 
 	if m.layout == config.LayoutHorizontal {
 		paneStyle = paneStyle.
-			BorderStyle(lipgloss.NormalBorder()).
-			BorderLeft(false).
+			Border(lipgloss.NormalBorder(), false, false, false, false).
 			PaddingLeft(0)
-
-		// Set offsets for image rendering
-		rowOffset := m.calculateInboxHeight() + 1
-		colOffset := sidebarWidth
-		if m.hideSidebar {
-			colOffset = 0
-		}
-		m.previewPane.SetOffsets(rowOffset, colOffset)
-	} else {
-		// Vertical mode offsets
-		colOffset := sidebarWidth
-		if m.hideSidebar {
-			colOffset = 0
-		}
-		colOffset += m.calculateInboxWidth() + 1
-		m.previewPane.SetOffsets(0, colOffset)
 	}
 
 	return paneStyle.Render(m.previewPane.View().Content)

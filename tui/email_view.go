@@ -336,7 +336,7 @@ func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		// Update viewport dimensions
 		m.viewport.SetWidth(msg.Width)
-		m.viewport.SetHeight(msg.Height - headerHeight - attachmentHeight)
+		m.viewport.SetHeight(msg.Height - headerHeight - attachmentHeight - 1) // -1 for help bar
 
 		// When the window size changes, wrap and clear kitty images to keep placement stable
 		ClearKittyGraphics()
@@ -468,10 +468,22 @@ func (m *EmailView) View() tea.View {
 	}
 
 	// m.viewport.View() returns a string in Bubbles v2 viewport
+	var out strings.Builder
+	out.WriteString(styledHeader)
+	out.WriteString("\n")
 	if calendarView != "" {
-		return tea.NewView(fmt.Sprintf("%s\n%s\n%s\n%s\n%s", styledHeader, calendarView, m.viewport.View(), attachmentView, help))
+		out.WriteString(calendarView)
+		out.WriteString("\n")
 	}
-	return tea.NewView(fmt.Sprintf("%s\n%s\n%s\n%s", styledHeader, m.viewport.View(), attachmentView, help))
+	out.WriteString(m.viewport.View())
+	if attachmentView != "" {
+		out.WriteString("\n")
+		out.WriteString(attachmentView)
+	}
+	out.WriteString("\n")
+	out.WriteString(help)
+
+	return tea.NewView(out.String())
 }
 
 // GetAccountID returns the account ID for this email
