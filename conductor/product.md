@@ -20,4 +20,4 @@ Matcha aims to become the standard terminal-based email client, providing a beau
 *   **AI Integration:** Built-in support for LLMs to assist with rewriting, summarizing, and drafting emails directly within the client.
 *   **AI Agent & CLI Support:** A non-interactive mode (`matcha send`) that allows scripts and autonomous agents to manage email communications programmatically.
 *   **Advanced Security:** Deep integration with PGP/GPG for signing and encrypting messages, including support for OpenPGP smart cards.
-*   **Flexible Layouts:** Support for multiple viewing modes, including side-by-side (Vertical) and top-bottom (Horizontal) split views for efficient email browsing and reading.
+*   **Flexible Layouts:** Support for multiple viewing modes, including side-by-side (Vertical) and top-bottom (Horizontal) split views. Includes a **Layout Quick Toggle** (Shift+L) for rapid cycling between layouts.
