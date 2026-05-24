@@ -143,7 +143,7 @@ func newInitialModel(cfg *config.Config, mailtoURL *url.URL) *mainModel {
 			}
 			subject := mailtoURL.Query().Get("subject")
 			body := mailtoURL.Query().Get("body")
-			initialModel.current = tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips)
+			initialModel.current = tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips, cfg.EnableEnhancedComposerExit)
 		} else {
 
 			initialModel.current = tui.NewChoice()
@@ -1050,10 +1050,10 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if m.config != nil && len(m.config.Accounts) > 0 {
 			firstAccount := m.config.GetFirstAccount()
-			composer := tui.NewComposerWithAccounts(m.config.Accounts, firstAccount.ID, msg.To, msg.Subject, msg.Body, hideTips)
+			composer := tui.NewComposerWithAccounts(m.config.Accounts, firstAccount.ID, msg.To, msg.Subject, msg.Body, hideTips, m.config.EnableEnhancedComposerExit)
 			m.current = composer
 		} else {
-			m.current = tui.NewComposer("", msg.To, msg.Subject, msg.Body, hideTips)
+			m.current = tui.NewComposer("", msg.To, msg.Subject, msg.Body, hideTips, m.config.EnableEnhancedComposerExit)
 		}
 		m.current, _ = m.current.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 		m.syncPluginKeyBindings()
@@ -1072,7 +1072,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			accounts = m.config.Accounts
 			hideTips = m.config.HideTips
 		}
-		composer := tui.NewComposerFromDraft(msg.Draft, accounts, hideTips)
+		composer := tui.NewComposerFromDraft(msg.Draft, accounts, hideTips, m.config.EnableEnhancedComposerExit)
 		m.current = composer
 		m.current, _ = m.current.Update(tea.WindowSizeMsg{Width: m.width, Height: m.height})
 		m.syncPluginKeyBindings()
@@ -1260,7 +1260,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				subject := m.mailtoURL.Query().Get("subject")
 				body := m.mailtoURL.Query().Get("body")
-				m.current = tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips)
+				m.current = tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips, cfg.EnableEnhancedComposerExit)
 			} else {
 				m.current = tui.NewChoice()
 			}
@@ -1495,7 +1495,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if accountID == "" {
 				accountID = m.config.GetFirstAccount().ID
 			}
-			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, to, subject, "", hideTips)
+			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, to, subject, "", hideTips, m.config.EnableEnhancedComposerExit)
 			// For catch-all accounts, pre-fill From with the specific address the email was delivered to.
 			if len(msg.Email.To) > 0 {
 				for i := range m.config.Accounts {
@@ -1515,7 +1515,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		} else {
-			composer = tui.NewComposer("", to, subject, "", hideTips)
+			composer = tui.NewComposer("", to, subject, "", hideTips, m.config.EnableEnhancedComposerExit)
 		}
 		composer.SetQuotedText(quotedText)
 
@@ -1555,9 +1555,9 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if accountID == "" {
 				accountID = m.config.GetFirstAccount().ID
 			}
-			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, "", subject, body, hideTips)
+			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, "", subject, body, hideTips, m.config.EnableEnhancedComposerExit)
 		} else {
-			composer = tui.NewComposer("", "", subject, body, hideTips)
+			composer = tui.NewComposer("", "", subject, body, hideTips, m.config.EnableEnhancedComposerExit)
 		}
 
 		m.current = composer

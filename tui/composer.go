@@ -73,6 +73,7 @@ type Composer struct {
 	showNotice       bool
 	noticeText       string
 	hideTips         bool
+	enableEnhancedExit bool
 
 	// Multi-account support
 	accounts           []config.Account
@@ -107,11 +108,12 @@ type Composer struct {
 }
 
 // NewComposer initializes a new composer model.
-func NewComposer(from, to, subject, body string, hideTips bool) *Composer {
+func NewComposer(from, to, subject, body string, hideTips, enableEnhancedExit bool) *Composer {
 	m := &Composer{
-		draftID:         uuid.New().String(),
-		hideTips:        hideTips,
-		attachmentNames: make(map[string]string),
+		draftID:            uuid.New().String(),
+		hideTips:           hideTips,
+		enableEnhancedExit: enableEnhancedExit,
+		attachmentNames:    make(map[string]string),
 	}
 
 	tiStyles := ThemedTextInputStyles()
@@ -288,8 +290,8 @@ func (m *Composer) updateSignature() {
 }
 
 // NewComposerWithAccounts initializes a composer with multiple account support.
-func NewComposerWithAccounts(accounts []config.Account, selectedAccountID string, to, subject, body string, hideTips bool) *Composer {
-	m := NewComposer("", to, subject, body, hideTips)
+func NewComposerWithAccounts(accounts []config.Account, selectedAccountID string, to, subject, body string, hideTips, enableEnhancedExit bool) *Composer {
+	m := NewComposer("", to, subject, body, hideTips, enableEnhancedExit)
 	m.accounts = accounts
 
 	// Find the selected account index
@@ -410,6 +412,43 @@ func truncateSuggestionDisplay(s string, maxLen int) string {
 		return string(runes[:maxLen])
 	}
 	return string(runes[:maxLen-3]) + "..."
+}
+
+func (m *Composer) handleSend() tea.Cmd {
+	if !m.canSendEmail() {
+		return m.showComposerNotice(t("composer.invalid_email_fields"))
+	}
+	if !m.hasAnyRecipient() {
+		return m.showComposerNotice(t("composer.recipient_required"))
+	}
+	acc := m.getSelectedAccount()
+	accountID := ""
+	if acc != nil {
+		accountID = acc.ID
+	}
+	fromOverride := ""
+	if m.isCatchAllAccount() {
+		fromOverride = m.fromInput.Value()
+	}
+	return func() tea.Msg {
+		return SendEmailMsg{
+			To:              m.toInput.Value(),
+			Cc:              m.ccInput.Value(),
+			Bcc:             m.bccInput.Value(),
+			Subject:         m.subjectInput.Value(),
+			Body:            m.bodyInput.Value(),
+			AttachmentPaths: m.attachmentPaths,
+			AccountID:       accountID,
+			FromOverride:    fromOverride,
+			QuotedText:      m.quotedText,
+			InReplyTo:       m.inReplyTo,
+			References:      m.references,
+			Signature:       m.signatureInput.Value(),
+			SignSMIME:       acc != nil && acc.SMIMESignByDefault,
+			EncryptSMIME:    m.encryptSMIME,
+			SignPGP:         acc != nil && acc.PGPSignByDefault,
+		}
+	}
 }
 
 func (m *Composer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -570,48 +609,11 @@ func (m *Composer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if m.confirmingExit {
-			cfg, _ := config.LoadConfig()
-			if cfg != nil && cfg.EnableEnhancedComposerExit {
+			if m.enableEnhancedExit {
 				switch msg.String() {
 				case "s", "S":
-					// Send logic (copied from focusSend handling)
-					if !m.canSendEmail() {
-						m.confirmingExit = false
-						return m, m.showComposerNotice(t("composer.invalid_email_fields"))
-					}
-					if !m.hasAnyRecipient() {
-						m.confirmingExit = false
-						return m, m.showComposerNotice(t("composer.recipient_required"))
-					}
-					acc := m.getSelectedAccount()
-					accountID := ""
-					if acc != nil {
-						accountID = acc.ID
-					}
-					fromOverride := ""
-					if m.isCatchAllAccount() {
-						fromOverride = m.fromInput.Value()
-					}
 					m.confirmingExit = false
-					return m, func() tea.Msg {
-						return SendEmailMsg{
-							To:              m.toInput.Value(),
-							Cc:              m.ccInput.Value(),
-							Bcc:             m.bccInput.Value(),
-							Subject:         m.subjectInput.Value(),
-							Body:            m.bodyInput.Value(),
-							AttachmentPaths: m.attachmentPaths,
-							AccountID:       accountID,
-							FromOverride:    fromOverride,
-							QuotedText:      m.quotedText,
-							InReplyTo:       m.inReplyTo,
-							References:      m.references,
-							Signature:       m.signatureInput.Value(),
-							SignSMIME:       acc != nil && acc.SMIMESignByDefault,
-							EncryptSMIME:    m.encryptSMIME,
-							SignPGP:         acc != nil && acc.PGPSignByDefault,
-						}
-					}
+					return m, m.handleSend()
 				case "a", "A":
 					m.confirmingExit = false
 					return m, func() tea.Msg { return DiscardDraftMsg{ComposerState: m} }
@@ -751,40 +753,7 @@ func (m *Composer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			case focusSend:
 				if msg.String() == "enter" {
-					if !m.canSendEmail() {
-						return m, m.showComposerNotice(t("composer.invalid_email_fields"))
-					}
-					if !m.hasAnyRecipient() {
-						return m, m.showComposerNotice(t("composer.recipient_required"))
-					}
-					acc := m.getSelectedAccount()
-					accountID := ""
-					if acc != nil {
-						accountID = acc.ID
-					}
-					fromOverride := ""
-					if m.isCatchAllAccount() {
-						fromOverride = m.fromInput.Value()
-					}
-					return m, func() tea.Msg {
-						return SendEmailMsg{
-							To:              m.toInput.Value(),
-							Cc:              m.ccInput.Value(),
-							Bcc:             m.bccInput.Value(),
-							Subject:         m.subjectInput.Value(),
-							Body:            m.bodyInput.Value(),
-							AttachmentPaths: m.attachmentPaths,
-							AccountID:       accountID,
-							FromOverride:    fromOverride,
-							QuotedText:      m.quotedText,
-							InReplyTo:       m.inReplyTo,
-							References:      m.references,
-							Signature:       m.signatureInput.Value(),
-							SignSMIME:       acc != nil && acc.SMIMESignByDefault,
-							EncryptSMIME:    m.encryptSMIME,
-							SignPGP:         acc != nil && acc.PGPSignByDefault,
-						}
-					}
+					return m, m.handleSend()
 				}
 			}
 		}
@@ -1082,8 +1051,7 @@ func (m *Composer) View() tea.View {
 	}
 
 	if m.confirmingExit {
-		cfg, _ := config.LoadConfig()
-		if cfg != nil && cfg.EnableEnhancedComposerExit {
+		if m.enableEnhancedExit {
 			dialog := DialogBoxStyle.Render(
 				lipgloss.JoinVertical(lipgloss.Center,
 					t("composer.exit_extended_prompt"),
@@ -1288,8 +1256,8 @@ func (m *Composer) ToDraft() config.Draft {
 }
 
 // NewComposerFromDraft creates a composer from an existing draft.
-func NewComposerFromDraft(draft config.Draft, accounts []config.Account, hideTips bool) *Composer {
-	m := NewComposerWithAccounts(accounts, draft.AccountID, draft.To, draft.Subject, draft.Body, hideTips)
+func NewComposerFromDraft(draft config.Draft, accounts []config.Account, hideTips, enableEnhancedExit bool) *Composer {
+	m := NewComposerWithAccounts(accounts, draft.AccountID, draft.To, draft.Subject, draft.Body, hideTips, enableEnhancedExit)
 	m.ccInput.SetValue(draft.Cc)
 	m.bccInput.SetValue(draft.Bcc)
 	m.draftID = draft.ID
