@@ -31,3 +31,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Interactive Send Reminders (Subject & Attachment)**
 *Link: [./tracks/interactive_send_reminders_20260524/](./tracks/interactive_send_reminders_20260524/)*
+
+---
+
+- [ ] **Track: Fix Missing Status Bar in Split Views**
+*Link: [./tracks/split_status_bar_fix_20260524/](./tracks/split_status_bar_fix_20260524/)*
