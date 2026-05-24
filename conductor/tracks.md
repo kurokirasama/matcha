@@ -19,11 +19,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Interactive Send Blocking Hooks**
-*Link: [./tracks/interactive_send_hooks_20260521/](./tracks/interactive_send_hooks_20260521/)*
-
----
-
 - [ ] **Track: Multi-line Email Headers**
 *Link: [./tracks/multiline_headers_20260523/](./tracks/multiline_headers_20260523/)*
 
@@ -31,3 +26,8 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 - [ ] **Track: Detailed Email Notifications**
 *Link: [./tracks/detailed_notifications_20260523/](./tracks/detailed_notifications_20260523/)*
+
+---
+
+- [ ] **Track: Interactive Send Reminders (Subject & Attachment)**
+*Link: [./tracks/interactive_send_reminders_20260524/](./tracks/interactive_send_reminders_20260524/)*
