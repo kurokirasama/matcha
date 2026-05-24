@@ -103,11 +103,11 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				case config.LayoutVertical:
 					m.cfg.Layout = config.LayoutHorizontal
 					m.cfg.EnableSplitPane = true
+					// Force off quick toggle when entering horizontal
+					m.cfg.EnableQuickToggle = false
 				case config.LayoutHorizontal:
 					m.cfg.Layout = config.LayoutOff
 					m.cfg.EnableSplitPane = false
-					// Also force off quick toggle if horizontal
-					m.cfg.EnableQuickToggle = false
 				default:
 					m.cfg.Layout = config.LayoutOff
 					m.cfg.EnableSplitPane = false
