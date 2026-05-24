@@ -42,7 +42,6 @@ func (m *EmailView) getAttachmentHeight() int {
 	if len(m.email.Attachments) == 0 {
 		return 0
 	}
-	// 1 line for "Attachments:", 1 line per attachment.
 	return 1 + len(m.email.Attachments)
 }
 
@@ -85,7 +84,6 @@ func (m *EmailView) getHelpText() string {
 
 func (m *EmailView) getHelpHeight(width int) int {
 	text := m.getHelpText()
-	// Render the help text with the given width to see how many lines it takes when it wraps.
 	return lipgloss.Height(HelpStyle.Width(width).Render(text))
 }
 
@@ -356,19 +354,16 @@ func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		headerHeight := m.getHeaderHeight(msg.Width)
 		calendarHeight := m.getCalendarHeight()
 		attachmentHeight := m.getAttachmentHeight()
-		if attachmentHeight > 0 {
-			attachmentHeight++ // spacer
-		}
 		helpHeight := m.getHelpHeight(msg.Width)
 		
-		// Reserved lines = components + joining newlines.
-		// For Ghostty full screen, subtract an extra 1 line to account for potential padding discrepancies.
-		reserved := headerHeight + 1
-		if calendarHeight > 0 { reserved += calendarHeight + 1 }
-		if attachmentHeight > 0 { reserved += attachmentHeight + 2 }
-		reserved += helpHeight + 2 // Increase spacer before help and add a safety line
+		// Budget exactly for: Header\n, Calendar\n, Body, Attachments\n, Help
+		// Spacer count = (Header exists? 1 : 0) + (Calendar exists? 1 : 0) + (Attachments exists? 1 : 0) + 1 (before Help)
+		spacers := 1 // Help spacer
+		if headerHeight > 0 { spacers++ }
+		if calendarHeight > 0 { spacers++ }
+		if attachmentHeight > 0 { spacers++ }
 		
-		vh := msg.Height - reserved
+		vh := msg.Height - headerHeight - calendarHeight - attachmentHeight - helpHeight - spacers
 		if vh < 1 { vh = 1 }
 		m.viewport.SetHeight(vh)
 
@@ -444,7 +439,7 @@ func (m *EmailView) View() tea.View {
 	b.WriteString(m.viewport.View())
 
 	if len(m.email.Attachments) > 0 {
-		b.WriteString("\n\n")
+		b.WriteString("\n")
 		var attB strings.Builder
 		attB.WriteString("Attachments:\n")
 		for i, attachment := range m.email.Attachments {
@@ -462,13 +457,12 @@ func (m *EmailView) View() tea.View {
 		b.WriteString(attachmentBoxStyle.Render(attB.String()))
 	}
 
-	b.WriteString("\n\n")
+	b.WriteString("\n")
 	helpText := m.getHelpText()
 	b.WriteString(HelpStyle.Width(m.viewport.Width()).Render(helpText))
 
 	content := strings.TrimSuffix(b.String(), "\n")
 	
-	// Final padding check to ensure help is at the absolute bottom
 	currentHeight := lipgloss.Height(content)
 	if currentHeight < m.totalHeight {
 		content += strings.Repeat("\n", m.totalHeight - currentHeight)
