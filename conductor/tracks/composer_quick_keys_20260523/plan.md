@@ -19,6 +19,6 @@
 - [x] Task: Conductor - User Manual Verification 'Composer Dialog' (Protocol in workflow.md) bd85392
 
 ## Phase 4: Final Verification
-- [ ] Task: Run `make build` and perform end-to-end manual verification.
-- [ ] Task: Verify that existing "y/n" functionality is unchanged when the setting is OFF.
-- [ ] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
+- [x] Task: Run `make build` and perform end-to-end manual verification. 6890de8
+- [x] Task: Verify that existing "y/n" functionality is unchanged when the setting is OFF. 6890de8
+- [x] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md) 6890de8
