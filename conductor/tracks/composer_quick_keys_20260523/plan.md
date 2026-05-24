@@ -12,11 +12,11 @@
 - [x] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index. 0107555
 - [x] Task: Conductor - User Manual Verification 'Settings UI' (Protocol in workflow.md) 0107555
 
-## Phase 3: Composer UI Refactor
+## Phase 3: Composer UI Refactor [checkpoint: ed7e94f]
 - [x] Task: Modify `Composer` model in `tui/composer.go` to handle the new keyboard states in the confirmation overlay. bd85392
 - [x] Task: Update the `View()` logic in `tui/composer.go` to render the new extended prompt when `EnableEnhancedComposerExit` is true. bd85392
 - [x] Task: Implement the `s` (Send), `a` (Abort/Delete), `d` (Save), and `c` (Cancel) logic within the composer's `Update` loop. bd85392
-- [~] Task: Conductor - User Manual Verification 'Composer Dialog' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Composer Dialog' (Protocol in workflow.md) bd85392
 
 ## Phase 4: Final Verification
 - [ ] Task: Run `make build` and perform end-to-end manual verification.
