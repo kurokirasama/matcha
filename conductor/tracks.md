@@ -29,10 +29,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Composer Quick Keys (Esc Modal)**
-*Link: [./tracks/composer_quick_keys_20260523/](./tracks/composer_quick_keys_20260523/)*
-
----
-
 - [ ] **Track: Detailed Email Notifications**
 *Link: [./tracks/detailed_notifications_20260523/](./tracks/detailed_notifications_20260523/)*
