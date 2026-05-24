@@ -1,10 +1,10 @@
 # Implementation Plan: Extended Composer Exit Actions
 
 ## Phase 1: Configuration Extension
-- [ ] Task: Add `EnableEnhancedComposerExit` boolean to `Config`, `secureDiskConfig`, and `diskConfig` structs in `config/config.go`.
-- [ ] Task: Update `SaveConfig` and `LoadConfig` to serialize/deserialize the new field.
-- [ ] Task: Write a regression test in `config/config_test.go` to ensure `EnableEnhancedComposerExit` persists correctly.
-- [ ] Task: Conductor - User Manual Verification 'Config Extension' (Protocol in workflow.md)
+- [x] Task: Add `EnableEnhancedComposerExit` boolean to `Config`, `secureDiskConfig`, and `diskConfig` structs in `config/config.go`. d7c1f92
+- [x] Task: Update `SaveConfig` and `LoadConfig` to serialize/deserialize the new field. d7c1f92
+- [x] Task: Write a regression test in `config/config_test.go` to ensure `EnableEnhancedComposerExit` persists correctly. d7c1f92
+- [~] Task: Conductor - User Manual Verification 'Config Extension' (Protocol in workflow.md)
 
 ## Phase 2: Settings UI Integration
 - [ ] Task: Add localization keys for `settings_general.enable_enhanced_composer_exit` in `i18n/locales/en.json` and `es.json`.
