@@ -644,3 +644,34 @@ func TestEnableEnhancedComposerExitPersistence(t *testing.T) {
 		t.Errorf("EnableEnhancedComposerExit was not persisted. Got: %v, Want: %v", loadedConfig.EnableEnhancedComposerExit, expectedConfig.EnableEnhancedComposerExit)
 	}
 }
+
+// TestEnableMainMenuKeybindsPersistence verifies that the EnableMainMenuKeybinds setting is persisted.
+func TestEnableMainMenuKeybindsPersistence(t *testing.T) {
+	keyring.MockInit()
+	tempDir := t.TempDir()
+	t.Setenv("HOME", tempDir)
+
+	expectedConfig := &Config{
+		EnableMainMenuKeybinds: true,
+		Accounts: []Account{
+			{
+				ID:    "test-id",
+				Email: "test@example.com",
+				SC:    &SessionCache{},
+			},
+		},
+	}
+
+	if err := SaveConfig(expectedConfig); err != nil {
+		t.Fatalf("SaveConfig() failed: %v", err)
+	}
+
+	loadedConfig, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("LoadConfig() failed: %v", err)
+	}
+
+	if loadedConfig.EnableMainMenuKeybinds != expectedConfig.EnableMainMenuKeybinds {
+		t.Errorf("EnableMainMenuKeybinds was not persisted. Got: %v, Want: %v", loadedConfig.EnableMainMenuKeybinds, expectedConfig.EnableMainMenuKeybinds)
+	}
+}

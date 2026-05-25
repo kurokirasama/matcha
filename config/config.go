@@ -117,6 +117,7 @@ type Config struct {
 	EnableThreaded       bool          `json:"enable_threaded,omitempty"`
 	EnableDetailedDates  bool          `json:"enable_detailed_dates,omitempty"`
 	EnableEnhancedComposerExit bool        `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds bool          `json:"enable_main_menu_keybinds,omitempty"`
 	Theme                string        `json:"theme,omitempty"`
 	MailingLists         []MailingList `json:"mailing_lists,omitempty"`
 	DateFormat           string        `json:"date_format,omitempty"`
@@ -442,6 +443,7 @@ type secureDiskConfig struct {
 	EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
 	EnableDetailedDates  bool                              `json:"enable_detailed_dates,omitempty"`
 	EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds bool                            `json:"enable_main_menu_keybinds,omitempty"`
 	Theme                string                            `json:"theme,omitempty"`
 	MailingLists         []MailingList                     `json:"mailing_lists,omitempty"`
 	DateFormat           string                            `json:"date_format,omitempty"`
@@ -494,6 +496,7 @@ func SaveConfig(config *Config) error {
 			EnableThreaded:       config.EnableThreaded,
 			EnableDetailedDates:  config.EnableDetailedDates,
 			EnableEnhancedComposerExit: config.EnableEnhancedComposerExit,
+			EnableMainMenuKeybinds: config.EnableMainMenuKeybinds,
 			Theme:                config.Theme,
 			MailingLists:         config.MailingLists,
 			DateFormat:           config.DateFormat,
@@ -602,6 +605,7 @@ func LoadConfig() (*Config, error) {
 		EnableThreaded       bool                              `json:"enable_threaded,omitempty"`
 		EnableDetailedDates  bool                              `json:"enable_detailed_dates,omitempty"`
 		EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
+		EnableMainMenuKeybinds bool                            `json:"enable_main_menu_keybinds,omitempty"`
 		Theme                string                            `json:"theme,omitempty"`
 		MailingLists         []MailingList                     `json:"mailing_lists,omitempty"`
 		DateFormat           string                            `json:"date_format,omitempty"`
@@ -646,6 +650,7 @@ func LoadConfig() (*Config, error) {
 	config.EnableThreaded = raw.EnableThreaded
 	config.EnableDetailedDates = raw.EnableDetailedDates
 	config.EnableEnhancedComposerExit = raw.EnableEnhancedComposerExit
+	config.EnableMainMenuKeybinds = raw.EnableMainMenuKeybinds
 	config.Theme = raw.Theme
 	config.MailingLists = raw.MailingLists
 	config.DateFormat = raw.DateFormat
