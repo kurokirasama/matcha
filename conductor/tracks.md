@@ -34,10 +34,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [x] **Track: Fix Missing Status Bar in Split Views**
-*Link: [./tracks/split_status_bar_fix_20260524/](./tracks/split_status_bar_fix_20260524/)*
-
----
-
 - [ ] **Track: Reply to All Feature**
 *Link: [./tracks/reply_to_all_20260524/](./tracks/reply_to_all_20260524/)*
