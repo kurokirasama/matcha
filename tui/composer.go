@@ -616,10 +616,10 @@ func (m *Composer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.handleSend()
 				case "a", "A":
 					m.confirmingExit = false
-					return m, func() tea.Msg { return DiscardDraftMsg{ComposerState: m} }
+					return m, func() tea.Msg { return BackToInboxMsg{} }
 				case "d", "D":
 					m.confirmingExit = false
-					return m, func() tea.Msg { return BackToInboxMsg{} }
+					return m, func() tea.Msg { return DiscardDraftMsg{ComposerState: m} }
 				case "c", "C", "esc":
 					m.confirmingExit = false
 					return m, nil
