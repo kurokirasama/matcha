@@ -22,3 +22,4 @@ Matcha aims to become the standard terminal-based email client, providing a beau
 *   **Advanced Security:** Deep integration with PGP/GPG for signing and encrypting messages, including support for OpenPGP smart cards.
 *   **Flexible Layouts:** Support for multiple viewing modes, including side-by-side (Vertical) and top-bottom (Horizontal) split views. Includes a **Layout Quick Toggle** (Shift+L) for rapid cycling between layouts.
 *   **Extended Composer Exit Actions:** A rich, keyboard-driven confirmation dialog for the email composer, allowing users to quickly send, save, abort, or cancel when exiting.
+*   **Quick Access Keys:** Single-key shortcuts (v, c, p, s) on the initial choice screen for rapid navigation to Inbox, Compose, Marketplace, and Settings.
