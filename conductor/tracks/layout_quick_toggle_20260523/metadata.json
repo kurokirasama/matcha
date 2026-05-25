@@ -1,8 +1,0 @@
-{
-  "track_id": "layout_quick_toggle_20260523",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-05-23T14:50:00Z",
-  "updated_at": "2026-05-23T14:50:00Z",
-  "description": "Add a new setting to enable/disable 'Enable Layout Quick Toggle'. The behavior depends on the preview mode: Shift+L cycles between full-screen and split-view logic in OFF and Vertical modes, while being forced OFF in Horizontal mode."
-}

@@ -39,5 +39,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Main Screen Global Keybinds (v, c, p, s)**
+- [~] **Track: Main Screen Global Keybinds (v, c, p, s)**
 *Link: [./tracks/main_menu_keybinds_20260524/](./tracks/main_menu_keybinds_20260524/)*
