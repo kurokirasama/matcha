@@ -40,6 +40,7 @@ type Choice struct {
 	width           int
 	height          int
 	keybindWarnings []string
+	EnableMainMenuKeybinds bool
 }
 
 func NewChoice() Choice {
@@ -53,6 +54,12 @@ func NewChoice() Choice {
 	}
 	choices = append(choices, "\uf487 "+t("choice.marketplace"))
 	choices = append(choices, "\uf013 "+t("choice.settings"))
+
+	enableMainMenuKeybinds := false
+	if cfg, err := config.LoadConfig(); err == nil {
+		enableMainMenuKeybinds = cfg.EnableMainMenuKeybinds
+	}
+
 	return Choice{
 		choices:         choices,
 		hasSavedDrafts:  hasSavedDrafts,
@@ -60,6 +67,7 @@ func NewChoice() Choice {
 		LatestVersion:   "",
 		CurrentVersion:  "",
 		keybindWarnings: config.ValidateKeybinds(config.Keybinds),
+		EnableMainMenuKeybinds: enableMainMenuKeybinds,
 	}
 }
 
@@ -75,7 +83,23 @@ func (m Choice) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case tea.KeyPressMsg:
 		kb := config.Keybinds
-		switch msg.String() {
+		switch keypress := msg.String(); keypress {
+		case "v", "V":
+			if m.EnableMainMenuKeybinds {
+				return m, func() tea.Msg { return GoToInboxMsg{} }
+			}
+		case "c", "C":
+			if m.EnableMainMenuKeybinds {
+				return m, func() tea.Msg { return GoToSendMsg{} }
+			}
+		case "p", "P":
+			if m.EnableMainMenuKeybinds {
+				return m, func() tea.Msg { return GoToMarketplaceMsg{} }
+			}
+		case "s", "S":
+			if m.EnableMainMenuKeybinds {
+				return m, func() tea.Msg { return GoToSettingsMsg{} }
+			}
 		case "up", kb.Global.NavUp:
 			m.cursor = (m.cursor - 1 + len(m.choices)) % len(m.choices)
 		case "down", kb.Global.NavDown:
@@ -170,7 +194,11 @@ func (m Choice) View() tea.View {
 	}
 
 	mainContent := b.String()
-	helpView := helpStyle.Render(t("choice.help"))
+	helpText := t("choice.help")
+	if m.EnableMainMenuKeybinds {
+		helpText = "v: view • c: compose • p: plugins • s: settings • " + helpText
+	}
+	helpView := helpStyle.Render(helpText)
 
 	if m.height > 0 {
 		currentHeight := lipgloss.Height(docStyle.Render(mainContent + helpView))

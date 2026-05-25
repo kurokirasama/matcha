@@ -344,9 +344,6 @@ type Inbox struct {
 	// older than a week. When empty, the built-in defaults apply.
 	dateFormat    string
 	detailedDates bool
-
-	// EnableMainMenuKeybinds toggle
-	EnableMainMenuKeybinds bool
 }
 
 // SetDateFormat configures the Go time layout used to render absolute
@@ -826,30 +823,6 @@ func (m *Inbox) Init() tea.Cmd {
 	return nil
 }
 
-func (m *Inbox) handleOpenAction() tea.Cmd {
-	selectedItem, ok := m.list.SelectedItem().(item)
-	if !ok {
-		return nil
-	}
-	if selectedItem.threadRoot && selectedItem.threadCount > 1 {
-		m.expanded[selectedItem.threadKey] = !m.expanded[selectedItem.threadKey]
-		m.updateList()
-		return nil
-	}
-	if selectedItem.uid == 0 {
-		return nil
-	}
-	idx := selectedItem.originalIndex
-	uid := selectedItem.uid
-	accountID := selectedItem.accountID
-	var email *fetcher.Email
-	if m.searchActive {
-		email = m.GetEmailAtIndex(idx)
-	}
-	return func() tea.Msg {
-		return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, FolderName: m.folderKey(), Email: email}
-	}
-}
 
 func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
@@ -877,22 +850,6 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		kb := config.Keybinds
 		searchBinding := searchKey()
 		switch keypress := msg.String(); keypress {
-		case "v", "V":
-			if m.EnableMainMenuKeybinds {
-				return m, m.handleOpenAction()
-			}
-		case "c", "C":
-			if m.EnableMainMenuKeybinds {
-				return m, func() tea.Msg { return GoToSendMsg{} }
-			}
-		case "p", "P":
-			if m.EnableMainMenuKeybinds {
-				return m, func() tea.Msg { return GoToMarketplaceMsg{} }
-			}
-		case "s", "S":
-			if m.EnableMainMenuKeybinds {
-				return m, func() tea.Msg { return GoToSettingsMsg{} }
-			}
 		case searchBinding:
 			m.searchOverlay = NewSearchOverlay(m.width, m.height)
 			return m, m.searchOverlay.Init()
@@ -1092,7 +1049,27 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return RequestRefreshMsg{Mailbox: m.mailbox, Counts: counts}
 			}
 		case kb.Inbox.Open:
-			return m, m.handleOpenAction()
+			selectedItem, ok := m.list.SelectedItem().(item)
+			if ok {
+				if selectedItem.threadRoot && selectedItem.threadCount > 1 {
+					m.expanded[selectedItem.threadKey] = !m.expanded[selectedItem.threadKey]
+					m.updateList()
+					return m, nil
+				}
+				if selectedItem.uid == 0 {
+					return m, nil
+				}
+				idx := selectedItem.originalIndex
+				uid := selectedItem.uid
+				accountID := selectedItem.accountID
+				var email *fetcher.Email
+				if m.searchActive {
+					email = m.GetEmailAtIndex(idx)
+				}
+				return m, func() tea.Msg {
+					return ViewEmailMsg{Index: idx, UID: uid, AccountID: accountID, Mailbox: m.mailbox, FolderName: m.folderKey(), Email: email}
+				}
+			}
 		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
