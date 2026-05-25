@@ -159,6 +159,7 @@
       "enable_threaded": "Vista de conversación",
       "enable_detailed_dates": "Fechas detalladas",
       "enable_enhanced_composer_exit": "Diálogo de salida mejorado en el redactor",
+      "enable_main_menu_keybinds": "Habilitar teclas de acceso rápido en el menú principal",
       "date_format": "Formato de Fecha",
       "language": "Idioma",
       "signature": "Editar Firma",
