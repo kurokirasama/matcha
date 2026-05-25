@@ -1,10 +1,10 @@
 # Implementation Plan: Main Screen Quick Keys
 
 ## Phase 1: Configuration & Persistence
-- [ ] Task: Write failing unit tests for `EnableMainMenuKeybinds` in `config/config_test.go`.
-- [ ] Task: Implement `EnableMainMenuKeybinds` boolean in `Config`, `secureDiskConfig`, and `diskConfig` structs in `config/config.go`.
-- [ ] Task: Update `SaveConfig` and `LoadConfig` in `config/config.go` to handle the new field.
-- [ ] Task: Conductor - User Manual Verification 'Configuration & Persistence' (Protocol in workflow.md)
+- [x] Task: Write failing unit tests for `EnableMainMenuKeybinds` in `config/config_test.go`. d0117ae
+- [x] Task: Implement `EnableMainMenuKeybinds` boolean in `Config`, `secureDiskConfig`, and `diskConfig` structs in `config/config.go`. d0117ae
+- [x] Task: Update `SaveConfig` and `LoadConfig` in `config/config.go` to handle the new field. d0117ae
+- [~] Task: Conductor - User Manual Verification 'Configuration & Persistence' (Protocol in workflow.md)
 
 ## Phase 2: Settings UI & Localization
 - [ ] Task: Add localization keys for `settings_general.enable_main_menu_keybinds` in `i18n/locales/en.json` and `es.json`.
