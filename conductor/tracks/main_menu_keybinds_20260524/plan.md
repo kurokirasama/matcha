@@ -7,10 +7,10 @@
 - [x] Task: Conductor - User Manual Verification 'Configuration & Persistence' (Protocol in workflow.md) d0117ae
 
 ## Phase 2: Settings UI & Localization
-- [ ] Task: Add localization keys for `settings_general.enable_main_menu_keybinds` in `i18n/locales/en.json` and `es.json`.
-- [ ] Task: Add a new toggle to `buildGeneralOptions()` in `tui/settings_general.go` with the label "Enable Main Menu Keybinds".
-- [ ] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index and save the configuration.
-- [ ] Task: Conductor - User Manual Verification 'Settings UI & Localization' (Protocol in workflow.md)
+- [x] Task: Add localization keys for `settings_general.enable_main_menu_keybinds` in `i18n/locales/en.json` and `es.json`. a50e2eb
+- [x] Task: Add a new toggle to `buildGeneralOptions()` in `tui/settings_general.go` with the label "Enable Main Menu Keybinds". a50e2eb
+- [x] Task: Update `updateGeneral()` in `tui/settings_general.go` to handle the setting index and save the configuration. a50e2eb
+- [~] Task: Conductor - User Manual Verification 'Settings UI & Localization' (Protocol in workflow.md)
 
 ## Phase 3: Inbox Keybind Implementation
 - [ ] Task: Write failing UI unit tests simulating key presses `v`, `c`, `p`, `s` in the Inbox view with the setting enabled/disabled.
