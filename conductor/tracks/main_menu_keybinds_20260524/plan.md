@@ -27,3 +27,6 @@
 - [ ] Task: Run `make build` and perform end-to-end manual testing of all triggers and persistence.
 - [ ] Task: Verify that keybinds are inactive when the setting is OFF or when focus is elsewhere.
 - [ ] Task: Conductor - User Manual Verification 'Final Quality Gate' (Protocol in workflow.md)
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions b7c6b1a
