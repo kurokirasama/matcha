@@ -670,6 +670,163 @@ func TestProcessBodyWithHyperlinkSupport(t *testing.T) {
 	}
 }
 
+func TestProcessBodySanitizesUnsafeHTMLLinks(t *testing.T) {
+	origTerm := os.Getenv("TERM")
+	origTermProgram := os.Getenv("TERM_PROGRAM")
+	origVTEVersion := os.Getenv("VTE_VERSION")
+	defer func() {
+		os.Setenv("TERM", origTerm)
+		os.Setenv("TERM_PROGRAM", origTermProgram)
+		os.Setenv("VTE_VERSION", origVTEVersion)
+	}()
+
+	os.Setenv("TERM", "xterm-kitty")
+	os.Setenv("TERM_PROGRAM", "")
+	os.Unsetenv("VTE_VERSION")
+
+	h1Style := lipgloss.NewStyle()
+	h2Style := lipgloss.NewStyle()
+	bodyStyle := lipgloss.NewStyle()
+
+	tests := []struct {
+		name              string
+		input             string
+		wantContains      string
+		forbiddenContains []string
+	}{
+		{
+			name:         "javascript link is rendered as text only",
+			input:        `<a href="javascript:alert(1)">Click here</a>`,
+			wantContains: "Click here",
+			forbiddenContains: []string{
+				"javascript:",
+				"\x1b]8;;javascript:",
+			},
+		},
+		{
+			name:         "mixed-case javascript link is rejected",
+			input:        `<a href="JaVaScRiPt:alert(1)">Click here</a>`,
+			wantContains: "Click here",
+			forbiddenContains: []string{
+				"JaVaScRiPt:",
+				"javascript:",
+			},
+		},
+		{
+			name:         "unsafe image source is not linked",
+			input:        `<img src="javascript:alert(1)" alt="bad image">After`,
+			wantContains: "After",
+			forbiddenContains: []string{
+				"javascript:",
+				"bad image",
+				"Click here to view image",
+			},
+		},
+		{
+			name:         "data image href is not rendered as a link",
+			input:        `<a href="data:image/png;base64,iVBORw0KGgo=">data link</a>`,
+			wantContains: "data link",
+			forbiddenContains: []string{
+				"data:image",
+				"\x1b]8;;data:",
+			},
+		},
+		{
+			name:         "cid href is not rendered as a link",
+			input:        `<a href="cid:test-image@example.com">cid link</a>`,
+			wantContains: "cid link",
+			forbiddenContains: []string{
+				"cid:test-image",
+				"\x1b]8;;cid:",
+			},
+		},
+		{
+			name:         "OSC control characters are stripped from safe links",
+			input:        "<a href=\"https://example.com/\x1b]8;;file:///tmp/pwn\x07\">safe</a>",
+			wantContains: "safe",
+			forbiddenContains: []string{
+				"\x1b]8;;file:",
+				"file:///tmp/pwn",
+				"\x07",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			processed, _, err := ProcessBody(tt.input, BodyMIMETypeHTML, h1Style, h2Style, bodyStyle, false)
+			if err != nil {
+				t.Fatalf("ProcessBody() failed: %v", err)
+			}
+			if !strings.Contains(processed, tt.wantContains) {
+				t.Fatalf("processed body does not contain %q:\n%q", tt.wantContains, processed)
+			}
+			for _, forbidden := range tt.forbiddenContains {
+				if strings.Contains(processed, forbidden) {
+					t.Fatalf("processed body contains forbidden %q:\n%q", forbidden, processed)
+				}
+			}
+		})
+	}
+}
+
+func TestProcessBodyDoesNotHyperlinkNonRemoteImageFallbacks(t *testing.T) {
+	t.Setenv("TERM", "xterm")
+	t.Setenv("TERM_PROGRAM", "")
+	t.Setenv("WEZTERM_EXECUTABLE", "/usr/bin/wezterm")
+
+	h1Style := lipgloss.NewStyle()
+	h2Style := lipgloss.NewStyle()
+	bodyStyle := lipgloss.NewStyle()
+
+	input := `
+		<img src="data:image/png;base64,iVBORw0KGgo=" alt="data image">
+		<img src="cid:test-image@example.com" alt="cid image">
+	`
+
+	processed, _, err := ProcessBody(input, BodyMIMETypeHTML, h1Style, h2Style, bodyStyle, true)
+	if err != nil {
+		t.Fatalf("ProcessBody() failed: %v", err)
+	}
+
+	for _, want := range []string{
+		"[Image: data image, data:image/png;base64,iVBORw0KGgo=]",
+		"[Image: cid image, cid:test-image@example.com]",
+	} {
+		if !strings.Contains(processed, want) {
+			t.Fatalf("processed body does not contain %q:\n%q", want, processed)
+		}
+	}
+
+	for _, forbidden := range []string{
+		"Click here to view image",
+		"\x1b]8;;data:",
+		"\x1b]8;;cid:",
+	} {
+		if strings.Contains(processed, forbidden) {
+			t.Fatalf("processed body contains forbidden %q:\n%q", forbidden, processed)
+		}
+	}
+}
+
+func TestIsRemoteImageURLAllowsUppercaseHTTPSScheme(t *testing.T) {
+	tests := []struct {
+		src  string
+		want bool
+	}{
+		{src: "http://example.com/image.png", want: true},
+		{src: "HTTPS://example.com/image.png", want: true},
+		{src: "cid:test-image@example.com", want: false},
+		{src: "data:image/png;base64,iVBORw0KGgo=", want: false},
+	}
+
+	for _, tt := range tests {
+		if got := isRemoteImageURL(tt.src); got != tt.want {
+			t.Fatalf("isRemoteImageURL(%q) = %v, want %v", tt.src, got, tt.want)
+		}
+	}
+}
+
 func TestProcessBodyWithImageProtocol(t *testing.T) {
 	// Save original environment variables
 	origTerm := os.Getenv("TERM")
