@@ -719,10 +719,10 @@ func (m *FolderInbox) SetEmails(emails []fetcher.Email, accounts []config.Accoun
 	m.inbox.SetEmails(emails, accounts)
 }
 
-func (m *FolderInbox) GetCurrentFolder() string { return m.currentFolder }
-func (m *FolderInbox) HasSplitPreview() bool { return m.previewPane != nil }
-func (m *FolderInbox) GetInbox() *Inbox { return m.inbox }
-func (m *FolderInbox) GetAccounts() []config.Account { return m.accounts }
+func (m *FolderInbox) GetCurrentFolder() string                 { return m.currentFolder }
+func (m *FolderInbox) HasSplitPreview() bool                    { return m.previewPane != nil }
+func (m *FolderInbox) GetInbox() *Inbox                         { return m.inbox }
+func (m *FolderInbox) GetAccounts() []config.Account            { return m.accounts }
 func (m *FolderInbox) RemoveEmail(uid uint32, accountID string) { m.inbox.RemoveEmail(uid, accountID) }
 
 func (m *FolderInbox) updateHelpKeys() {
@@ -746,7 +746,7 @@ func (m *FolderInbox) SetLoadingEmails(loading bool) {
 }
 
 func (m *FolderInbox) SetRefreshing(refreshing bool) { m.inbox.isRefreshing = refreshing }
-func (m *FolderInbox) GetFolders() []string { return m.folders }
+func (m *FolderInbox) GetFolders() []string          { return m.folders }
 
 func (m *FolderInbox) renderInboxPane() string {
 	inboxWidth := m.calculateInboxWidth()

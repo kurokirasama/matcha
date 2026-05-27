@@ -112,25 +112,25 @@ type MailingList struct {
 
 // Config stores the user's email configuration with multiple accounts.
 type Config struct {
-	Accounts                []Account     `json:"accounts"`
-	DisableImages           bool          `json:"disable_images,omitempty"`
-	HideTips                bool          `json:"hide_tips,omitempty"`
-	Layout                  LayoutMode    `json:"layout,omitempty"`
-	EnableQuickToggle       bool          `json:"enable_quick_toggle,omitempty"`
-	SplitActive             bool          `json:"split_active,omitempty"`
-	DisableNotifications    bool          `json:"disable_notifications,omitempty"`
-	EnableSplitPane         bool          `json:"enable_split_pane,omitempty"`
-	EnableThreaded          bool          `json:"enable_threaded,omitempty"`
-	EnableDetailedDates     bool          `json:"enable_detailed_dates,omitempty"`
-	EnableEnhancedComposerExit bool        `json:"enable_enhanced_composer_exit,omitempty"`
-	EnableMainMenuKeybinds  bool          `json:"enable_main_menu_keybinds,omitempty"`
-	DisableSpellcheck       bool          `json:"disable_spellcheck,omitempty"`
-	DisableSpellSuggestions bool          `json:"disable_spell_suggestions,omitempty"`
-	Theme                   string        `json:"theme,omitempty"`
-	MailingLists            []MailingList `json:"mailing_lists,omitempty"`
-	DateFormat              string        `json:"date_format,omitempty"`
-	Language                string        `json:"language,omitempty"` // Language code (e.g., "en", "es", "de")
-	BodyCacheThresholdMB    int           `json:"body_cache_threshold_mb,omitempty"`
+	Accounts                   []Account     `json:"accounts"`
+	DisableImages              bool          `json:"disable_images,omitempty"`
+	HideTips                   bool          `json:"hide_tips,omitempty"`
+	Layout                     LayoutMode    `json:"layout,omitempty"`
+	EnableQuickToggle          bool          `json:"enable_quick_toggle,omitempty"`
+	SplitActive                bool          `json:"split_active,omitempty"`
+	DisableNotifications       bool          `json:"disable_notifications,omitempty"`
+	EnableSplitPane            bool          `json:"enable_split_pane,omitempty"`
+	EnableThreaded             bool          `json:"enable_threaded,omitempty"`
+	EnableDetailedDates        bool          `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool          `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds     bool          `json:"enable_main_menu_keybinds,omitempty"`
+	DisableSpellcheck          bool          `json:"disable_spellcheck,omitempty"`
+	DisableSpellSuggestions    bool          `json:"disable_spell_suggestions,omitempty"`
+	Theme                      string        `json:"theme,omitempty"`
+	MailingLists               []MailingList `json:"mailing_lists,omitempty"`
+	DateFormat                 string        `json:"date_format,omitempty"`
+	Language                   string        `json:"language,omitempty"` // Language code (e.g., "en", "es", "de")
+	BodyCacheThresholdMB       int           `json:"body_cache_threshold_mb,omitempty"`
 
 	// PluginSettings stores user-configurable values for installed plugins,
 	// keyed by plugin name then setting key. Values are JSON-native types
@@ -441,25 +441,25 @@ type secureDiskAccount struct {
 }
 
 type secureDiskConfig struct {
-	Accounts                []secureDiskAccount               `json:"accounts"`
-	DisableImages           bool                              `json:"disable_images,omitempty"`
-	HideTips                bool                              `json:"hide_tips,omitempty"`
-	Layout                  LayoutMode                        `json:"layout,omitempty"`
-	EnableQuickToggle       bool                              `json:"enable_quick_toggle,omitempty"`
-	SplitActive             bool                              `json:"split_active,omitempty"`
-	DisableNotifications    bool                              `json:"disable_notifications,omitempty"`
-	EnableSplitPane         bool                              `json:"enable_split_pane,omitempty"`
-	EnableThreaded          bool                              `json:"enable_threaded,omitempty"`
-	EnableDetailedDates     bool                              `json:"enable_detailed_dates,omitempty"`
-	EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
-	EnableMainMenuKeybinds  bool                              `json:"enable_main_menu_keybinds,omitempty"`
-	DisableSpellcheck       bool                              `json:"disable_spellcheck,omitempty"`
-	DisableSpellSuggestions bool                              `json:"disable_spell_suggestions,omitempty"`
-	Theme                   string                            `json:"theme,omitempty"`
-	MailingLists            []MailingList                     `json:"mailing_lists,omitempty"`
-	DateFormat              string                            `json:"date_format,omitempty"`
-	Language                string                            `json:"language,omitempty"`
-	PluginSettings          map[string]map[string]interface{} `json:"plugin_settings,omitempty"`
+	Accounts                   []secureDiskAccount               `json:"accounts"`
+	DisableImages              bool                              `json:"disable_images,omitempty"`
+	HideTips                   bool                              `json:"hide_tips,omitempty"`
+	Layout                     LayoutMode                        `json:"layout,omitempty"`
+	EnableQuickToggle          bool                              `json:"enable_quick_toggle,omitempty"`
+	SplitActive                bool                              `json:"split_active,omitempty"`
+	DisableNotifications       bool                              `json:"disable_notifications,omitempty"`
+	EnableSplitPane            bool                              `json:"enable_split_pane,omitempty"`
+	EnableThreaded             bool                              `json:"enable_threaded,omitempty"`
+	EnableDetailedDates        bool                              `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool                              `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds     bool                              `json:"enable_main_menu_keybinds,omitempty"`
+	DisableSpellcheck          bool                              `json:"disable_spellcheck,omitempty"`
+	DisableSpellSuggestions    bool                              `json:"disable_spell_suggestions,omitempty"`
+	Theme                      string                            `json:"theme,omitempty"`
+	MailingLists               []MailingList                     `json:"mailing_lists,omitempty"`
+	DateFormat                 string                            `json:"date_format,omitempty"`
+	Language                   string                            `json:"language,omitempty"`
+	PluginSettings             map[string]map[string]interface{} `json:"plugin_settings,omitempty"`
 }
 
 // SaveConfig saves the given configuration to the config file and passwords to the keyring.
@@ -497,15 +497,15 @@ func SaveConfig(config *Config) error {
 	if secureMode {
 		// In secure mode, include passwords in the JSON (they'll be encrypted on disk)
 		sdc := secureDiskConfig{
-			DisableImages:        config.DisableImages,
-			HideTips:             config.HideTips,
-			Layout:               config.Layout,
-			EnableQuickToggle:    config.EnableQuickToggle,
-			SplitActive:          config.SplitActive,
-			DisableNotifications: config.DisableNotifications,
-			EnableSplitPane:      config.EnableSplitPane,
-			EnableThreaded:       config.EnableThreaded,
-			EnableDetailedDates:  config.EnableDetailedDates,
+			DisableImages:              config.DisableImages,
+			HideTips:                   config.HideTips,
+			Layout:                     config.Layout,
+			EnableQuickToggle:          config.EnableQuickToggle,
+			SplitActive:                config.SplitActive,
+			DisableNotifications:       config.DisableNotifications,
+			EnableSplitPane:            config.EnableSplitPane,
+			EnableThreaded:             config.EnableThreaded,
+			EnableDetailedDates:        config.EnableDetailedDates,
 			EnableEnhancedComposerExit: config.EnableEnhancedComposerExit,
 			EnableMainMenuKeybinds:     config.EnableMainMenuKeybinds,
 			DisableSpellcheck:          config.DisableSpellcheck,
@@ -607,26 +607,26 @@ func LoadConfig() (*Config, error) {
 		CatchAll           bool   `json:"catch_all,omitempty"`
 	}
 	type diskConfig struct {
-		Accounts                []rawAccount                      `json:"accounts"`
-		DisableImages           bool                              `json:"disable_images,omitempty"`
-		HideTips                bool                              `json:"hide_tips,omitempty"`
-		Layout                  LayoutMode                        `json:"layout,omitempty"`
-		EnableQuickToggle       bool                              `json:"enable_quick_toggle,omitempty"`
-		SplitActive             bool                              `json:"split_active,omitempty"`
-		DisableNotifications    bool                              `json:"disable_notifications,omitempty"`
-		EnableSplitPane         bool                              `json:"enable_split_pane,omitempty"`
-		EnableThreaded          bool                              `json:"enable_threaded,omitempty"`
-		EnableDetailedDates     bool                              `json:"enable_detailed_dates,omitempty"`
-		EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
-		EnableMainMenuKeybinds  bool                              `json:"enable_main_menu_keybinds,omitempty"`
-		DisableSpellcheck       bool                              `json:"disable_spellcheck,omitempty"`
-		DisableSpellSuggestions bool                              `json:"disable_spell_suggestions,omitempty"`
-		Theme                   string                            `json:"theme,omitempty"`
-		MailingLists            []MailingList                     `json:"mailing_lists,omitempty"`
-		DateFormat              string                            `json:"date_format,omitempty"`
-		Language                string                            `json:"language,omitempty"`
-		BodyCacheThresholdMB    int                               `json:"body_cache_threshold_mb,omitempty"`
-		PluginSettings          map[string]map[string]interface{} `json:"plugin_settings,omitempty"`
+		Accounts                   []rawAccount                      `json:"accounts"`
+		DisableImages              bool                              `json:"disable_images,omitempty"`
+		HideTips                   bool                              `json:"hide_tips,omitempty"`
+		Layout                     LayoutMode                        `json:"layout,omitempty"`
+		EnableQuickToggle          bool                              `json:"enable_quick_toggle,omitempty"`
+		SplitActive                bool                              `json:"split_active,omitempty"`
+		DisableNotifications       bool                              `json:"disable_notifications,omitempty"`
+		EnableSplitPane            bool                              `json:"enable_split_pane,omitempty"`
+		EnableThreaded             bool                              `json:"enable_threaded,omitempty"`
+		EnableDetailedDates        bool                              `json:"enable_detailed_dates,omitempty"`
+		EnableEnhancedComposerExit bool                              `json:"enable_enhanced_composer_exit,omitempty"`
+		EnableMainMenuKeybinds     bool                              `json:"enable_main_menu_keybinds,omitempty"`
+		DisableSpellcheck          bool                              `json:"disable_spellcheck,omitempty"`
+		DisableSpellSuggestions    bool                              `json:"disable_spell_suggestions,omitempty"`
+		Theme                      string                            `json:"theme,omitempty"`
+		MailingLists               []MailingList                     `json:"mailing_lists,omitempty"`
+		DateFormat                 string                            `json:"date_format,omitempty"`
+		Language                   string                            `json:"language,omitempty"`
+		BodyCacheThresholdMB       int                               `json:"body_cache_threshold_mb,omitempty"`
+		PluginSettings             map[string]map[string]interface{} `json:"plugin_settings,omitempty"`
 	}
 
 	var raw diskConfig

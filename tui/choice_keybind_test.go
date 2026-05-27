@@ -32,11 +32,11 @@ func TestChoiceMainMenuKeybinds(t *testing.T) {
 				EnableMainMenuKeybinds: tt.enabled,
 			}
 			config.SaveConfig(cfg)
-			
+
 			m := NewChoice()
-			msg := tea.KeyPressMsg{Text: tt.key} 
+			msg := tea.KeyPressMsg{Text: tt.key}
 			_, cmd := m.Update(msg)
-			
+
 			if tt.wantType == nil {
 				if cmd != nil {
 					res := cmd()

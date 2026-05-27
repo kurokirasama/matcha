@@ -21,7 +21,7 @@ func TestInbox_ToggleRead(t *testing.T) {
 
 	// Simulate pressing 'u' to toggle read status
 	_, cmd := inbox.Update(tea.KeyPressMsg{Code: 'u', Text: "u"})
-	
+
 	if cmd == nil {
 		t.Fatal("Expected a command for toggling read status, but got nil")
 	}
@@ -39,18 +39,18 @@ func TestInbox_ToggleRead(t *testing.T) {
 	// Now simulate it being read
 	emails[0].IsRead = true
 	inbox.SetEmails(emails, accounts)
-	
+
 	_, cmd = inbox.Update(tea.KeyPressMsg{Code: 'u', Text: "u"})
 	if cmd == nil {
 		t.Fatal("Expected a command for toggling unread status, but got nil")
 	}
-	
+
 	msg = cmd()
 	markUnreadMsg, ok := msg.(MarkEmailAsUnreadMsg)
 	if !ok {
 		t.Fatalf("Expected MarkEmailAsUnreadMsg, got %T", msg)
 	}
-	
+
 	if markUnreadMsg.UID != 1 {
 		t.Errorf("Expected UID 1, got %d", markUnreadMsg.UID)
 	}
@@ -69,7 +69,7 @@ func TestEmailView_ToggleRead(t *testing.T) {
 
 	// Simulate pressing 'u' to toggle read status
 	_, cmd := view.Update(tea.KeyPressMsg{Code: 'u', Text: "u"})
-	
+
 	if cmd == nil {
 		t.Fatal("Expected a command for toggling read status in EmailView, but got nil")
 	}

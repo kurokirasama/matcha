@@ -7,7 +7,7 @@ import (
 func TestEmailViewOffsets(t *testing.T) {
 	ev := &EmailView{}
 	ev.SetOffsets(10, 20)
-	
+
 	if ev.rowOffset != 10 {
 		t.Errorf("expected rowOffset 10, got %d", ev.rowOffset)
 	}

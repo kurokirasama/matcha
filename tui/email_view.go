@@ -202,9 +202,9 @@ func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox Ma
 		originalICSData:   originalICSData,
 		isPreviewMode:     false,
 	}
-	
+
 	m.Update(tea.WindowSizeMsg{Width: width, Height: height})
-	
+
 	return m
 }
 
@@ -355,16 +355,24 @@ func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		calendarHeight := m.getCalendarHeight()
 		attachmentHeight := m.getAttachmentHeight()
 		helpHeight := m.getHelpHeight(msg.Width)
-		
+
 		// Budget exactly for: Header\n, Calendar\n, Body, Attachments\n, Help
 		// Spacer count = (Header exists? 1 : 0) + (Calendar exists? 1 : 0) + (Attachments exists? 1 : 0) + 1 (before Help)
 		spacers := 1 // Help spacer
-		if headerHeight > 0 { spacers++ }
-		if calendarHeight > 0 { spacers++ }
-		if attachmentHeight > 0 { spacers++ }
-		
+		if headerHeight > 0 {
+			spacers++
+		}
+		if calendarHeight > 0 {
+			spacers++
+		}
+		if attachmentHeight > 0 {
+			spacers++
+		}
+
 		vh := msg.Height - headerHeight - calendarHeight - attachmentHeight - helpHeight - spacers
-		if vh < 1 { vh = 1 }
+		if vh < 1 {
+			vh = 1
+		}
 		m.viewport.SetHeight(vh)
 
 		ClearKittyGraphics()
@@ -466,34 +474,38 @@ func (m *EmailView) View() tea.View {
 	b.WriteString(HelpStyle.Width(m.viewport.Width()).Render(helpText))
 
 	content := strings.TrimSuffix(b.String(), "\n")
-	
+
 	currentHeight := lipgloss.Height(content)
 	if currentHeight < m.totalHeight {
-		content += strings.Repeat("\n", m.totalHeight - currentHeight)
+		content += strings.Repeat("\n", m.totalHeight-currentHeight)
 	}
-	
+
 	return tea.NewView(content)
 }
 
-func (m *EmailView) GetAccountID() string { return m.accountID }
-func (m *EmailView) SetPluginStatus(status string) { m.pluginStatus = status }
+func (m *EmailView) GetAccountID() string                             { return m.accountID }
+func (m *EmailView) SetPluginStatus(status string)                    { m.pluginStatus = status }
 func (m *EmailView) SetPluginKeyBindings(bindings []PluginKeyBinding) { m.pluginKeyBindings = bindings }
 
 func inlineImagesFromAttachments(atts []fetcher.Attachment) []view.InlineImage {
 	var imgs []view.InlineImage
 	for _, att := range atts {
-		if !att.Inline || len(att.Data) == 0 || att.ContentID == "" { continue }
+		if !att.Inline || len(att.Data) == 0 || att.ContentID == "" {
+			continue
+		}
 		imgs = append(imgs, view.InlineImage{CID: att.ContentID, Base64: base64.StdEncoding.EncodeToString(att.Data)})
 	}
 	return imgs
 }
 
 func wrapBodyToWidth(body string, width int) string { return BodyStyle.Width(width).Render(body) }
-func (m *EmailView) GetEmail() fetcher.Email { return m.email }
-func (m *EmailView) SetOffsets(row, col int) { m.rowOffset = row; m.columnOffset = col }
+func (m *EmailView) GetEmail() fetcher.Email        { return m.email }
+func (m *EmailView) SetOffsets(row, col int)        { m.rowOffset = row; m.columnOffset = col }
 
 func renderCalendarInvite(event *calendar.Event) string {
-	if event == nil { return "" }
+	if event == nil {
+		return ""
+	}
 	style := lipgloss.NewStyle().Border(lipgloss.DoubleBorder()).BorderForeground(theme.ActiveTheme.Accent).Padding(1, 2)
 	var b strings.Builder
 	b.WriteString("📅 Meeting Invite\n\n")
@@ -516,7 +528,8 @@ func renderCalendarInvite(event *calendar.Event) string {
 }
 
 func formatEventTime(start, end time.Time) string {
-	start = start.Local(); end = end.Local()
+	start = start.Local()
+	end = end.Local()
 	if start.Format("2006-01-02") == end.Format("2006-01-02") {
 		return fmt.Sprintf("%s, %s - %s", start.Format("Mon Jan 2, 2006"), start.Format("3:04 PM"), end.Format("3:04 PM"))
 	}
@@ -524,6 +537,8 @@ func formatEventTime(start, end time.Time) string {
 }
 
 func truncateString(s string, maxLen int) string {
-	if len(s) <= maxLen { return s }
+	if len(s) <= maxLen {
+		return s
+	}
 	return s[:maxLen] + "..."
 }

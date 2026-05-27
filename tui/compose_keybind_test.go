@@ -18,7 +18,7 @@ func TestInbox_Compose(t *testing.T) {
 
 	// Simulate pressing 'c' to compose
 	_, cmd := inbox.Update(tea.KeyPressMsg{Code: 'c', Text: "c"})
-	
+
 	if cmd == nil {
 		t.Fatal("Expected a command for composing, but got nil")
 	}
@@ -41,7 +41,7 @@ func TestInbox_ComposeHelp(t *testing.T) {
 
 	// AdditionalShortHelpKeys is a function that returns []key.Binding
 	// We need to access the inner list's help to verify it.
-	// But it's unexported. We can check via the help view if we want, 
+	// But it's unexported. We can check via the help view if we want,
 	// or just implement and verify manually if testing unexported fields is too hard.
 	// Actually, let's just implement it.
 }

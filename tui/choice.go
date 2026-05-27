@@ -31,15 +31,15 @@ const choiceLogo = `
 `
 
 type Choice struct {
-	cursor          int
-	choices         []string
-	hasSavedDrafts  bool
-	UpdateAvailable bool
-	LatestVersion   string
-	CurrentVersion  string
-	width           int
-	height          int
-	keybindWarnings []string
+	cursor                 int
+	choices                []string
+	hasSavedDrafts         bool
+	UpdateAvailable        bool
+	LatestVersion          string
+	CurrentVersion         string
+	width                  int
+	height                 int
+	keybindWarnings        []string
 	EnableMainMenuKeybinds bool
 }
 
@@ -61,12 +61,12 @@ func NewChoice() Choice {
 	}
 
 	return Choice{
-		choices:         choices,
-		hasSavedDrafts:  hasSavedDrafts,
-		UpdateAvailable: false,
-		LatestVersion:   "",
-		CurrentVersion:  "",
-		keybindWarnings: config.ValidateKeybinds(config.Keybinds),
+		choices:                choices,
+		hasSavedDrafts:         hasSavedDrafts,
+		UpdateAvailable:        false,
+		LatestVersion:          "",
+		CurrentVersion:         "",
+		keybindWarnings:        config.ValidateKeybinds(config.Keybinds),
 		EnableMainMenuKeybinds: enableMainMenuKeybinds,
 	}
 }

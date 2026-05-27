@@ -59,27 +59,27 @@ type hideComposerNoticeMsg struct{}
 
 // Composer model holds the state of the email composition UI.
 type Composer struct {
-	focusIndex       int
-	toInput          textinput.Model
-	ccInput          textinput.Model
-	bccInput         textinput.Model
-	fromError        string
-	toError          string
-	ccError          string
-	bccError         string
-	subjectInput     textinput.Model
-	bodyInput        textarea.Model
-	signatureInput   textarea.Model
-	attachmentPaths  []string
-	attachmentNames  map[string]string
-	attachmentCursor int
-	encryptSMIME     bool
-	width            int
-	height           int
-	confirmingExit   bool
-	showNotice       bool
-	noticeText       string
-	hideTips         bool
+	focusIndex         int
+	toInput            textinput.Model
+	ccInput            textinput.Model
+	bccInput           textinput.Model
+	fromError          string
+	toError            string
+	ccError            string
+	bccError           string
+	subjectInput       textinput.Model
+	bodyInput          textarea.Model
+	signatureInput     textarea.Model
+	attachmentPaths    []string
+	attachmentNames    map[string]string
+	attachmentCursor   int
+	encryptSMIME       bool
+	width              int
+	height             int
+	confirmingExit     bool
+	showNotice         bool
+	noticeText         string
+	hideTips           bool
 	enableEnhancedExit bool
 
 	// Multi-account support

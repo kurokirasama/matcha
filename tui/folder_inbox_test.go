@@ -163,14 +163,14 @@ func TestFolderInbox_ToggleLayout_Vertical(t *testing.T) {
 
 	// Toggle Shift+L
 	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
-	
+
 	if !fi.splitActive {
 		t.Error("expected splitActive to be true after pressing Shift+L in Vertical mode")
 	}
 
 	// Toggle back
 	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
-	
+
 	if fi.splitActive {
 		t.Error("expected splitActive to be false after pressing Shift+L again")
 	}
@@ -187,7 +187,7 @@ func TestFolderInbox_ToggleLayout_Horizontal(t *testing.T) {
 
 	// Toggle Shift+L
 	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
-	
+
 	// Should NOT change splitActive in Horizontal mode
 	if !fi.splitActive {
 		t.Error("expected splitActive to remain true in Horizontal mode")

@@ -1,8 +1,8 @@
 package tui
 
 import (
-	"testing"
 	"github.com/floatpane/matcha/config"
+	"testing"
 )
 
 func TestSettingsSplitViewOption(t *testing.T) {
@@ -10,7 +10,7 @@ func TestSettingsSplitViewOption(t *testing.T) {
 		Layout: config.LayoutOff,
 	}
 	settings := NewSettings(cfg)
-	
+
 	options := settings.buildGeneralOptions()
 	found := false
 	for _, opt := range options {
@@ -19,7 +19,7 @@ func TestSettingsSplitViewOption(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !found {
 		t.Errorf("expected settings_general.split_view option not found")
 	}
@@ -30,7 +30,7 @@ func TestSettingsQuickToggleOption(t *testing.T) {
 		EnableQuickToggle: false,
 	}
 	settings := NewSettings(cfg)
-	
+
 	options := settings.buildGeneralOptions()
 	found := false
 	for _, opt := range options {
@@ -39,7 +39,7 @@ func TestSettingsQuickToggleOption(t *testing.T) {
 			break
 		}
 	}
-	
+
 	if !found {
 		t.Errorf("expected settings_general.layout_quick_toggle option not found")
 	}
@@ -51,7 +51,7 @@ func TestSettingsQuickToggleDisabledInHorizontal(t *testing.T) {
 		EnableQuickToggle: true,
 	}
 	settings := NewSettings(cfg)
-	
+
 	options := settings.buildGeneralOptions()
 	for _, opt := range options {
 		if opt.labelKey == "settings_general.layout_quick_toggle" {
