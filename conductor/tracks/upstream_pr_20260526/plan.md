@@ -1,9 +1,9 @@
 # Implementation Plan: Upstream Sync and PR
 
 ## Phase 1: Synchronization and Conflict Resolution
-- [ ] Task: Fetch upstream and inspect current state
-    - [ ] Fetch latest from `upstream` remote (`floatpane/matcha`).
-    - [ ] Identify the public feature branch (e.g., `master`) to be synced.
+- [x] Task: Fetch upstream and inspect current state (7dc7022)
+    - [x] Fetch latest from `upstream` remote (`floatpane/matcha`).
+    - [x] Identify the public feature branch (e.g., `master`) to be synced.
 - [ ] Task: Sync public branch with upstream
     - [ ] Checkout the public feature branch.
     - [ ] Merge `upstream/master` into the branch.
