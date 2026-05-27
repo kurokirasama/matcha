@@ -4,7 +4,7 @@
 - [x] Task: Fetch upstream and inspect current state (7dc7022)
     - [x] Fetch latest from `upstream` remote (`floatpane/matcha`).
     - [x] Identify the public feature branch (e.g., `master`) to be synced.
-- [ ] Task: Sync public branch with upstream
+- [~] Task: Sync public branch with upstream
     - [ ] Checkout the public feature branch.
     - [ ] Merge `upstream/master` into the branch.
     - [ ] Resolve any conflicts: accept upstream changes while preserving the new feature logic.
