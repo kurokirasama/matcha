@@ -752,13 +752,15 @@ func (m *Inbox) getTitle() string {
 	return title
 }
 
+const keySent = "Sent"
+
 func (m *Inbox) getBaseTitle() string {
 	if m.folderName != "" {
 		return m.folderName
 	}
 	switch m.mailbox {
 	case MailboxSent:
-		return "Sent"
+		return keySent
 	case MailboxTrash:
 		return "Trash"
 	case MailboxArchive:
@@ -1024,15 +1026,15 @@ func (m *Inbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 					}
 					return BatchMarkReadMsg{UIDs: uids, AccountID: accountID, Mailbox: m.mailbox}
 				}
-			} else {
-				selectedItem, ok := m.list.SelectedItem().(item)
-				if ok && selectedItem.uid != 0 {
-					return m, func() tea.Msg {
-						if selectedItem.isRead {
-							return MarkEmailAsUnreadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
-						}
-						return MarkEmailAsReadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
+			}
+
+			selectedItem, ok := m.list.SelectedItem().(item)
+			if ok && selectedItem.uid != 0 {
+				return m, func() tea.Msg {
+					if selectedItem.isRead {
+						return MarkEmailAsUnreadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
 					}
+					return MarkEmailAsReadMsg{UID: selectedItem.uid, AccountID: selectedItem.accountID, FolderName: m.folderKey()}
 				}
 			}
 		case kb.Inbox.Refresh:
@@ -1493,7 +1495,7 @@ func (m *Inbox) calculateListHeight(totalHeight int) int {
 	if len(m.tabs) > 1 {
 		h -= 4 // tab bar + padding/margin/border
 	}
-	h -= 1 // help line
+	h-- // help line
 	if h < 5 {
 		h = 5
 	}

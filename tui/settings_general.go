@@ -32,7 +32,8 @@ func getLayoutLabel(mode config.LayoutMode) string {
 }
 
 func (m *Settings) buildGeneralOptions() []generalOption {
-	opts := []generalOption{
+	opts := make([]generalOption, 0, 14+len(m.cfg.Accounts))
+	opts = append(opts, []generalOption{
 		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, false, ""},
 		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, false, ""},
 		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, false, ""},
@@ -47,7 +48,7 @@ func (m *Settings) buildGeneralOptions() []generalOption {
 		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, false, ""},
 		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, false, ""},
 		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, false, ""},
-	}
+	}...)
 
 	for _, acc := range m.cfg.Accounts {
 		status := t("settings_general.signature_not_configured")
@@ -67,7 +68,7 @@ func (m *Settings) buildGeneralOptions() []generalOption {
 	return opts
 }
 
-func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
+func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 	opts := m.buildGeneralOptions()
 
 	switch msg.String() {

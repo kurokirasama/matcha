@@ -2600,45 +2600,6 @@ func parseEmailAddress(addr string) (name, email string) {
 	return name, email
 }
 
-func fetchEmailBodyCmd(cfg *config.Config, uid uint32, accountID string, mailbox tui.MailboxKind) tea.Cmd {
-	return func() tea.Msg {
-		account := cfg.GetAccountByID(accountID)
-		if account == nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: string(mailbox), Err: fmt.Errorf("account not found")}
-		}
-
-		var (
-			body         string
-			bodyMIMEType string
-			attachments  []fetcher.Attachment
-			err          error
-		)
-		switch mailbox {
-		case tui.MailboxSent:
-			body, bodyMIMEType, attachments, err = fetcher.FetchSentEmailBody(account, uid)
-		case tui.MailboxTrash:
-			body, bodyMIMEType, attachments, err = fetcher.FetchTrashEmailBody(account, uid)
-		case tui.MailboxArchive:
-			body, bodyMIMEType, attachments, err = fetcher.FetchArchiveEmailBody(account, uid)
-		default:
-			body, bodyMIMEType, attachments, err = fetcher.FetchEmailBody(account, uid)
-		}
-		if err != nil {
-			return tui.EmailBodyFetchedMsg{UID: uid, AccountID: accountID, Mailbox: mailbox, FolderName: string(mailbox), Err: err}
-		}
-
-		return tui.EmailBodyFetchedMsg{
-			UID:          uid,
-			Body:         body,
-			BodyMIMEType: bodyMIMEType,
-			Attachments:  attachments,
-			AccountID:    accountID,
-			Mailbox:      mailbox,
-			FolderName:   string(mailbox),
-		}
-	}
-}
-
 func markdownToHTML(md []byte) []byte {
 	return clib.MarkdownToHTML(md)
 }

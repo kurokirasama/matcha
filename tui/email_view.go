@@ -65,7 +65,7 @@ func (m *EmailView) getHelpText() string {
 	if toggleReadKey == "" {
 		toggleReadKey = config.Keybinds.Inbox.ToggleRead
 	}
-	shortcuts.WriteString(fmt.Sprintf("\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • %s: read status • \uf435 tab: focus attachments • \ueb06 esc: back to inbox", toggleReadKey))
+	fmt.Fprintf(&shortcuts, "\uf112 r: reply • \uf064 f: forward • \uea81 d: delete • \uea98 a: archive • %s: read status • \uf435 tab: focus attachments • \ueb06 esc: back to inbox", toggleReadKey)
 	if view.ImageProtocolSupported() {
 		shortcuts.WriteString(" • \uf03e i: toggle images")
 	}
@@ -178,8 +178,9 @@ func NewEmailView(email fetcher.Email, emailIndex, width, height int, mailbox Ma
 	body, placements, err := view.ProcessBodyWithInline(email.Body, email.BodyMIMEType, inlineImages, H1Style, H2Style, BodyStyle, !showImages)
 	if err != nil {
 		body = fmt.Sprintf("Error rendering body: %v", err)
+	} else {
+		body = applyBodyTransform(body, email)
 	}
-	body = applyBodyTransform(body, email)
 
 	m := &EmailView{
 		viewport:          viewport.New(),
@@ -219,7 +220,7 @@ func (m *EmailView) Init() tea.Cmd {
 	return nil
 }
 
-func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *EmailView) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 	var cmd tea.Cmd
 	cmds := make([]tea.Cmd, 0, 1)
 

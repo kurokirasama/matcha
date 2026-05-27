@@ -75,7 +75,7 @@ func (m Choice) Init() tea.Cmd {
 	return nil
 }
 
-func (m Choice) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Choice) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width

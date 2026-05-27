@@ -273,17 +273,17 @@ func (m *FolderInbox) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocycl
 				}
 				m.moveSourceFolder = m.currentFolder
 				return m, nil
-			} else {
-				selectedItem, ok := m.inbox.list.SelectedItem().(item)
-				if ok {
-					m.movingEmail = true
-					m.moveTargetIdx = 0
-					m.moveUID = selectedItem.uid
-					m.moveUIDs = []uint32{selectedItem.uid}
-					m.moveAccountID = selectedItem.accountID
-					m.moveSourceFolder = m.currentFolder
-					return m, nil
-				}
+			}
+
+			selectedItem, ok := m.inbox.list.SelectedItem().(item)
+			if ok {
+				m.movingEmail = true
+				m.moveTargetIdx = 0
+				m.moveUID = selectedItem.uid
+				m.moveUIDs = []uint32{selectedItem.uid}
+				m.moveAccountID = selectedItem.accountID
+				m.moveSourceFolder = m.currentFolder
+				return m, nil
 			}
 		case kb.Inbox.ToggleSidebar:
 			m.hideSidebar = !m.hideSidebar
@@ -451,8 +451,7 @@ func (m *FolderInbox) wrapInboxCmd(cmd tea.Cmd) tea.Cmd {
 
 func (m *FolderInbox) updateMoveOverlay(msg tea.Msg) (tea.Model, tea.Cmd) {
 	kb := config.Keybinds
-	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	if msg, ok := msg.(tea.KeyPressMsg); ok {
 		switch msg.String() {
 		case kb.Global.Cancel:
 			m.movingEmail = false
@@ -483,14 +482,14 @@ func (m *FolderInbox) updateMoveOverlay(msg tea.Msg) (tea.Model, tea.Cmd) {
 							DestFolder:   destFolder,
 						}
 					}
-				} else {
-					return m, func() tea.Msg {
-						return MoveEmailToFolderMsg{
-							UID:          m.moveUID,
-							AccountID:    m.moveAccountID,
-							SourceFolder: m.moveSourceFolder,
-							DestFolder:   destFolder,
-						}
+				}
+
+				return m, func() tea.Msg {
+					return MoveEmailToFolderMsg{
+						UID:          m.moveUID,
+						AccountID:    m.moveAccountID,
+						SourceFolder: m.moveSourceFolder,
+						DestFolder:   destFolder,
 					}
 				}
 			}
@@ -531,7 +530,8 @@ func (m *FolderInbox) View() tea.View {
 		sidebar = m.renderSidebar()
 	}
 
-	if m.previewPane != nil {
+	switch {
+	case m.previewPane != nil:
 		inboxPane := m.renderInboxPane()
 		previewPane := m.renderPreviewPane()
 
@@ -557,7 +557,7 @@ func (m *FolderInbox) View() tea.View {
 				}
 			}
 		}
-	} else if m.previewedUID != 0 {
+	case m.previewedUID != 0:
 		inboxPane := m.renderInboxPane()
 		emptyPreview := m.renderEmptyPreview()
 		if m.layout == config.LayoutHorizontal {
@@ -581,7 +581,7 @@ func (m *FolderInbox) View() tea.View {
 				}
 			}
 		}
-	} else {
+	default:
 		inboxView := m.inbox.View().Content
 		if m.hideSidebar {
 			content = inboxView
