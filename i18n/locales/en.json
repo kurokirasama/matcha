@@ -14,7 +14,9 @@
       "previous": "Previous",
       "loading": "Loading...",
       "error": "Error",
-      "success": "Success"
+      "success": "Success",
+      "logs": "Logs",
+      "no_logs_yet": "No logs yet"
     },
     "composer": {
       "title": "Compose New Email",
@@ -154,6 +156,8 @@
       "enable_split_pane": "Split Pane View",
       "enable_threaded": "Threaded Conversation View",
       "enable_detailed_dates": "Detailed Dates",
+      "spellcheck": "Spellcheck",
+      "spell_suggestions": "Spell Suggestions",
       "date_format": "Date Format",
       "language": "Language",
       "signature": "Edit Signature",

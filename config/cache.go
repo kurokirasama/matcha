@@ -378,7 +378,7 @@ func SearchContactsForAccount(query, accountID string) []Contact {
 func MigrateContactsCacheUsage(accountIDs []string) error {
 	cache, err := LoadContactsCache()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	changed := false
@@ -539,7 +539,7 @@ func SaveDraft(draft Draft) error {
 func DeleteDraft(id string) error {
 	cache, err := LoadDraftsCache()
 	if err != nil {
-		return nil // No cache, nothing to delete
+		return err
 	}
 
 	var filtered []Draft
@@ -707,12 +707,7 @@ func saveEmailBodyCache(cache *EmailBodyCache) error {
 // mutate cache state.
 func GetCachedEmailBody(folderName string, uid uint32, accountID string, threshold int) *CachedEmailBody {
 	lru := GetLRUInstance(threshold)
-
-	if node := lru.Get(folderName, uid, accountID); node != nil {
-		return node.Body
-	}
-
-	return nil
+	return lru.Get(folderName, uid, accountID)
 }
 
 func calculateEmailBodySize(body *CachedEmailBody) int {
@@ -726,14 +721,6 @@ func calculateEmailBodySize(body *CachedEmailBody) int {
 		size += len(att.CalendarData)
 	}
 	return size
-}
-
-func calculateTotalCacheSize(cache *EmailBodyCache) int {
-	total := 0
-	for _, b := range cache.Bodies {
-		total += b.SizeBytes
-	}
-	return total
 }
 
 // SaveEmailBody saves or updates a cached email body for a folder.
@@ -753,7 +740,7 @@ func PruneEmailBodyCache(folderName string, validUIDs map[uint32]string, thresho
 	cache, err := LoadEmailBodyCache(folderName)
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	lru := GetLRUInstance(threshold)

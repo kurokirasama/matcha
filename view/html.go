@@ -13,11 +13,16 @@ import (
 
 	"charm.land/lipgloss/v2"
 	"github.com/floatpane/matcha/clib"
+	"github.com/floatpane/matcha/internal/htmlsanitizer"
 	"github.com/floatpane/matcha/internal/httpclient"
 	"github.com/floatpane/matcha/internal/loglevel"
 	"github.com/floatpane/matcha/theme"
 	lru "github.com/hashicorp/golang-lru/v2"
 )
+
+var htmlSanitizer htmlsanitizer.Sanitizer = htmlsanitizer.NewLibSanitizer()
+
+const termGhostty = "ghostty"
 
 func linkStyle() lipgloss.Style {
 	return lipgloss.NewStyle().Foreground(theme.ActiveTheme.Link)
@@ -40,7 +45,7 @@ func getTerminalCellSize() int {
 
 	// Try /dev/tty directly - this works even when stdio is redirected (e.g., in Bubble Tea)
 	if tty, err := os.Open("/dev/tty"); err == nil {
-		defer tty.Close()
+		defer tty.Close() //nolint:errcheck
 		if cellHeight := getCellHeightFromFd(int(tty.Fd())); cellHeight > 0 {
 			return cellHeight
 		}
@@ -57,7 +62,7 @@ func hyperlinkSupported() bool {
 	// Terminals known to support OSC 8 hyperlinks
 	supportedTerms := []string{
 		"kitty",
-		"ghostty",
+		termGhostty,
 		"wezterm",
 		"alacritty",
 		"foot",
@@ -77,7 +82,7 @@ func hyperlinkSupported() bool {
 		"iterm.app",
 		"hyper",
 		"vscode",
-		"ghostty",
+		termGhostty,
 		"wezterm",
 	}
 
@@ -105,6 +110,8 @@ func hyperlinkSupported() bool {
 
 // hyperlink formats a string as either a terminal-clickable hyperlink or plain text with URL.
 func hyperlink(url, text string) string {
+	url = strings.TrimSpace(url)
+	text = stripTerminalControls(text)
 	if text == "" {
 		text = url
 	}
@@ -114,13 +121,30 @@ func hyperlink(url, text string) string {
 	if supported {
 		// Use OSC 8 hyperlink sequence for supported terminals
 		return fmt.Sprintf("\x1b]8;;%s\x07%s\x1b]8;;\x07", url, linkStyle().Render(text))
-	} else {
-		// Fallback to plain text format for unsupported terminals
-		if text == url {
-			return fmt.Sprintf("<%s>", linkStyle().Render(url))
-		}
-		return fmt.Sprintf("%s <%s>", linkStyle().Render(text), linkStyle().Render(url))
 	}
+	// Fallback to plain text format for unsupported terminals
+	if text == url {
+		return fmt.Sprintf("<%s>", linkStyle().Render(url))
+	}
+	return fmt.Sprintf("%s <%s>", linkStyle().Render(text), linkStyle().Render(url))
+}
+
+func stripTerminalControls(s string) string {
+	return strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\t' {
+			return r
+		}
+		if r < 0x20 || r == 0x7f || r == 0x9c {
+			return -1
+		}
+		return r
+	}, s)
+}
+
+func hasTerminalControls(s string) bool {
+	return strings.IndexFunc(s, func(r rune) bool {
+		return r < 0x20 || r == 0x7f || r == 0x9c
+	}) != -1
 }
 
 func decodeQuotedPrintable(s string) (string, error) {
@@ -148,12 +172,12 @@ func kittySupported() bool {
 func ghosttySupported() bool {
 	// Check for TERM containing ghostty
 	term := strings.ToLower(os.Getenv("TERM"))
-	if strings.Contains(term, "ghostty") {
+	if strings.Contains(term, termGhostty) {
 		return true
 	}
 
 	// Check for Ghostty-specific environment variables
-	if os.Getenv("TERM_PROGRAM") == "ghostty" {
+	if os.Getenv("TERM_PROGRAM") == termGhostty {
 		return true
 	}
 
@@ -187,11 +211,7 @@ func weztermSupported() bool {
 	}
 
 	term := strings.ToLower(os.Getenv("TERM"))
-	if strings.Contains(term, "wezterm") {
-		return true
-	}
-
-	return false
+	return strings.Contains(term, "wezterm")
 }
 
 func waystSupported() bool {
@@ -201,11 +221,7 @@ func waystSupported() bool {
 	}
 
 	termProgram := strings.ToLower(os.Getenv("TERM_PROGRAM"))
-	if termProgram == "wayst" {
-		return true
-	}
-
-	return false
+	return termProgram == "wayst"
 }
 
 func warpSupported() bool {
@@ -229,11 +245,7 @@ func konsoleSupported() bool {
 	}
 
 	termProgram := strings.ToLower(os.Getenv("TERM_PROGRAM"))
-	if termProgram == "konsole" {
-		return true
-	}
-
-	return false
+	return termProgram == "konsole"
 }
 
 func zellijSupported() bool {
@@ -276,14 +288,22 @@ func debugImageProtocol(format string, args ...interface{}) {
 	msg := fmt.Sprintf("[img-protocol] "+format+"\n", args...)
 	loglevel.Infof("%s", strings.TrimSuffix(msg, "\n"))
 	if path := os.Getenv("DEBUG_IMAGE_PROTOCOL_LOG"); path != "" {
-		if f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(msg)
-			_ = f.Close()
+		if f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil { //nolint:gosec
+			if _, err := f.WriteString(msg); err != nil {
+				loglevel.Debugf("image protocol write error: %v", err)
+			}
+			if err := f.Close(); err != nil {
+				loglevel.Debugf("image protocol close error: %v", err)
+			}
 		}
 	} else if path := os.Getenv("DEBUG_KITTY_LOG"); path != "" {
-		if f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
-			_, _ = f.WriteString(msg)
-			_ = f.Close()
+		if f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil { //nolint:gosec
+			if _, err := f.WriteString(msg); err != nil {
+				loglevel.Debugf("image protocol write error: %v", err)
+			}
+			if err := f.Close(); err != nil {
+				loglevel.Debugf("image protocol close error: %v", err)
+			}
 		}
 	}
 }
@@ -326,7 +346,7 @@ func fetchRemoteBase64(url string) string {
 		debugImageProtocol("remote fetch failed url=%s err=%v", url, err)
 		return ""
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		debugImageProtocol("remote fetch non-200 url=%s status=%d", url, resp.StatusCode)
 		return ""
@@ -369,103 +389,6 @@ func dataURIBase64(uri string) string {
 const imageRowPlaceholderPrefix = "[[MATCHA_IMG_ROWS:"
 const imageRowPlaceholderSuffix = "]]"
 
-func kittyInlineImage(payload string) string {
-	if payload == "" {
-		return ""
-	}
-
-	const chunkSize = 4096
-	var b strings.Builder
-
-	// Calculate how many terminal rows the image occupies to advance text after it.
-	rows := 1
-	if data, err := base64.StdEncoding.DecodeString(payload); err == nil {
-		if _, h, ok := clib.ImageDimensions(data); ok {
-			cellHeight := getTerminalCellSize()
-			rows = (h + cellHeight - 1) / cellHeight
-			if rows < 1 {
-				rows = 1
-			}
-			debugImageProtocol("image height: %d pixels, cell height: %d pixels, rows needed: %d", h, cellHeight, rows)
-		}
-	}
-
-	for offset := 0; offset < len(payload); offset += chunkSize {
-		end := offset + chunkSize
-		if end > len(payload) {
-			end = len(payload)
-		}
-		more := "0"
-		if end < len(payload) {
-			more = "1"
-		}
-
-		chunk := payload[offset:end]
-		if offset == 0 {
-			// C=1 means cursor does NOT move after image render (stays at top-left of image position)
-			// This is needed for proper TUI rendering, but we must add newlines to push text below
-			b.WriteString(fmt.Sprintf("\x1b_Gf=100,a=T,q=2,C=1,m=%s;%s\x1b\\", more, chunk))
-		} else {
-			b.WriteString(fmt.Sprintf("\x1b_Gm=%s;%s\x1b\\", more, chunk))
-		}
-	}
-
-	// Add newlines to push cursor below the image.
-	// Use a placeholder that won't be collapsed by the newline regex.
-	b.WriteString(fmt.Sprintf("\n%s%d%s\n", imageRowPlaceholderPrefix, rows, imageRowPlaceholderSuffix))
-
-	return b.String()
-}
-
-// iterm2InlineImage renders an image using iTerm2's image protocol
-func iterm2InlineImage(payload string) string {
-	if payload == "" {
-		return ""
-	}
-
-	// Calculate rows for cursor positioning
-	rows := 1
-	if data, err := base64.StdEncoding.DecodeString(payload); err == nil {
-		if _, h, ok := clib.ImageDimensions(data); ok {
-			cellHeight := getTerminalCellSize()
-			rows = (h + cellHeight - 1) / cellHeight
-			if rows < 1 {
-				rows = 1
-			}
-			debugImageProtocol("image height: %d pixels, cell height: %d pixels, rows needed: %d", h, cellHeight, rows)
-		}
-	}
-
-	// iTerm2 image protocol: ESC]1337;File=inline=1:<base64_data>BEL
-	result := fmt.Sprintf("\x1b]1337;File=inline=1:%s\x07\n", payload)
-
-	// Add placeholder for row spacing
-	result += fmt.Sprintf("%s%d%s\n", imageRowPlaceholderPrefix, rows, imageRowPlaceholderSuffix)
-
-	return result
-}
-
-// sixelInlineImage returns Sixel escape sequence + newline placeholders
-func sixelInlineImage(base64PNG string) string {
-	data, err := base64.StdEncoding.DecodeString(base64PNG)
-	if err != nil {
-		return ""
-	}
-
-	cellHeight := getTerminalCellSize()
-	sixel, rows, err := clib.EncodePNGToSixel(data, cellHeight)
-	if err != nil {
-		debugImageProtocol("Sixel encoding failed: %v", err)
-		return ""
-	}
-
-	debugImageProtocol("Sixel: encoded %d bytes, %d rows", len(sixel), rows)
-
-	// Sixel sequences don't auto-advance cursor
-	// Add newlines to preserve layout
-	return sixel + strings.Repeat("\n", rows)
-}
-
 // sixelImageEscapeOnly returns raw Sixel for out-of-band rendering
 func sixelImageEscapeOnly(base64PNG string) string {
 	data, err := base64.StdEncoding.DecodeString(base64PNG)
@@ -480,28 +403,6 @@ func sixelImageEscapeOnly(base64PNG string) string {
 	}
 
 	return sixel
-}
-
-// renderInlineImage renders an image using the appropriate protocol for the detected terminal
-func renderInlineImage(payload string) string {
-	if payload == "" {
-		return ""
-	}
-
-	// Priority: Sixel in multiplexers overrides native protocols
-	if sixelSupported() {
-		return sixelInlineImage(payload)
-	}
-
-	if kittySupported() || ghosttySupported() || weztermSupported() || waystSupported() || konsoleSupported() {
-		// These terminals use the Kitty graphics protocol
-		return kittyInlineImage(payload)
-	} else if iterm2Supported() || warpSupported() {
-		// iTerm2 and Warp use the iTerm2 image protocol
-		return iterm2InlineImage(payload)
-	}
-
-	return ""
 }
 
 // imageRows calculates the number of terminal rows an image occupies.
@@ -546,12 +447,12 @@ func kittyUploadImage(payload string, id uint32) {
 		if offset == 0 {
 			// a=t: transmit (upload) only, don't display yet
 			// i=ID: assign this image ID
-			fmt.Fprintf(os.Stdout, "\x1b_Gf=100,a=t,i=%d,q=2,m=%s;%s\x1b\\", id, more, chunk)
+			fmt.Fprintf(os.Stdout, "\x1b_Gf=100,a=t,i=%d,q=2,m=%s;%s\x1b\\", id, more, chunk) //nolint:errcheck
 		} else {
-			fmt.Fprintf(os.Stdout, "\x1b_Gm=%s;%s\x1b\\", more, chunk)
+			fmt.Fprintf(os.Stdout, "\x1b_Gm=%s;%s\x1b\\", more, chunk) //nolint:errcheck
 		}
 	}
-	os.Stdout.Sync()
+	os.Stdout.Sync() //nolint:errcheck,gosec
 }
 
 // kittyDisplayImage displays a previously uploaded image by its ID at the
@@ -602,9 +503,9 @@ func RenderImageToStdout(placement *ImagePlacement, screenRow int, screenCol ...
 
 		debugImageProtocol("Sixel: rendering %d bytes at row=%d col=%d", len(placement.SixelEncoded), screenRow+1, col)
 		// Position cursor + render Sixel
-		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u",
+		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u", //nolint:errcheck
 			screenRow+1, col, placement.SixelEncoded)
-		os.Stdout.Sync()
+		os.Stdout.Sync() //nolint:errcheck,gosec
 		return
 	}
 
@@ -619,12 +520,12 @@ func RenderImageToStdout(placement *ImagePlacement, screenRow int, screenCol ...
 			placement.Uploaded = true
 		}
 		seq := kittyDisplayImage(placement.ID)
-		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u", screenRow+1, col, seq)
-		os.Stdout.Sync()
+		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u", screenRow+1, col, seq) //nolint:errcheck
+		os.Stdout.Sync()                                                           //nolint:errcheck,gosec
 	} else if useIterm2 {
 		seq := iterm2ImageEscapeOnly(placement.Base64)
-		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u", screenRow+1, col, seq)
-		os.Stdout.Sync()
+		fmt.Fprintf(os.Stdout, "\x1b[s\x1b[%d;%dH%s\x1b[u", screenRow+1, col, seq) //nolint:errcheck
+		os.Stdout.Sync()                                                           //nolint:errcheck,gosec
 	}
 }
 
@@ -711,6 +612,7 @@ func processBody(rawBody, mimeType string, inline map[string]string, h1Style, h2
 	} else {
 		htmlBody = markdownToHTML([]byte(decodedBody))
 	}
+	htmlBody = htmlSanitizer.SanitizeBytes(htmlBody)
 
 	result, placements, err := renderHTMLToText(htmlBody, inline, h1Style, h2Style, disableImages)
 	if err != nil {
@@ -723,7 +625,8 @@ func processBody(rawBody, mimeType string, inline map[string]string, h1Style, h2
 	// keep these alive. Retry through the markdown pre-pass when the direct
 	// HTML path produces nothing.
 	if directHTML && strings.TrimSpace(result) == "" {
-		result, placements, err = renderHTMLToText(markdownToHTML([]byte(decodedBody)), inline, h1Style, h2Style, disableImages)
+		fallbackHTML := htmlSanitizer.SanitizeBytes(markdownToHTML([]byte(decodedBody)))
+		result, placements, err = renderHTMLToText(fallbackHTML, inline, h1Style, h2Style, disableImages)
 		if err != nil {
 			return "", nil, err
 		}
@@ -765,17 +668,25 @@ func renderHTMLToText(htmlBody []byte, inline map[string]string, h1Style, h2Styl
 			text.WriteString("\n\n")
 
 		case clib.HElemLink:
-			text.WriteString(hyperlink(elem.Attr1, elem.Text))
+			if hasTerminalControls(elem.Attr1) {
+				text.WriteString(stripTerminalControls(elem.Text))
+			} else {
+				text.WriteString(hyperlink(elem.Attr1, elem.Text))
+			}
 
 		case clib.HElemImage:
-			src := elem.Attr1
-			alt := elem.Attr2
+			src := strings.TrimSpace(elem.Attr1)
+			alt := stripTerminalControls(elem.Attr2)
+			if hasTerminalControls(src) {
+				continue
+			}
 
 			if !disableImages && imageProtocolSupported() {
 				var payload string
-				if strings.HasPrefix(src, "data:image/") {
+				switch {
+				case strings.HasPrefix(src, "data:image/"):
 					payload = dataURIBase64(src)
-				} else if strings.HasPrefix(src, "cid:") {
+				case strings.HasPrefix(src, "cid:"):
 					cid := strings.TrimPrefix(src, "cid:")
 					cid = strings.Trim(cid, "<>")
 					if inline != nil {
@@ -784,7 +695,7 @@ func renderHTMLToText(htmlBody []byte, inline map[string]string, h1Style, h2Styl
 					} else {
 						debugImageProtocol("cid lookup skipped inline map nil for %s", cid)
 					}
-				} else if strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://") {
+				case strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://"):
 					payload = fetchRemoteBase64(src)
 				}
 
@@ -800,22 +711,22 @@ func renderHTMLToText(htmlBody []byte, inline map[string]string, h1Style, h2Styl
 						rows    int
 					}{idx, payload, rows})
 
-					text.WriteString(fmt.Sprintf("\n[[MATCHA_IMG:%d]]", idx))
-					text.WriteString(fmt.Sprintf("\n%s%d%s\n", imageRowPlaceholderPrefix, rows, imageRowPlaceholderSuffix))
+					fmt.Fprintf(&text, "\n[[MATCHA_IMG:%d]]", idx)
+					fmt.Fprintf(&text, "\n%s%d%s\n", imageRowPlaceholderPrefix, rows, imageRowPlaceholderSuffix)
 					continue
 				}
 				debugImageProtocol("no payload for src=%s", src)
 			}
-			if hyperlinkSupported() {
-				text.WriteString(fmt.Sprintf("\n %s \n", hyperlink(src, fmt.Sprintf("[Click here to view image: %s]", alt))))
+			if isRemoteImageURL(src) && hyperlinkSupported() {
+				fmt.Fprintf(&text, "\n %s \n", hyperlink(src, fmt.Sprintf("[Click here to view image: %s]", alt)))
 			} else {
-				text.WriteString(fmt.Sprintf("\n %s \n", linkStyle().Render(fmt.Sprintf("[Image: %s, %s]", alt, src))))
+				fmt.Fprintf(&text, "\n %s \n", linkStyle().Render(fmt.Sprintf("[Image: %s, %s]", alt, src)))
 			}
 
 		case clib.HElemTable:
 			headerRows := 0
 			if elem.Attr1 != "" {
-				fmt.Sscanf(elem.Attr1, "%d", &headerRows)
+				fmt.Sscanf(elem.Attr1, "%d", &headerRows) //nolint:errcheck,gosec
 			}
 			text.WriteString("\n")
 			text.WriteString(renderTable(elem.Text, headerRows))
@@ -855,7 +766,7 @@ func renderHTMLToText(htmlBody []byte, inline map[string]string, h1Style, h2Styl
 		for lineNum, line := range lines {
 			if matches := imgMarkerRegex.FindStringSubmatch(line); matches != nil {
 				var idx int
-				fmt.Sscanf(matches[1], "%d", &idx)
+				fmt.Sscanf(matches[1], "%d", &idx) //nolint:errcheck,gosec
 				for _, pi := range pendingImages {
 					if pi.index == idx {
 						placements = append(placements, ImagePlacement{
@@ -874,6 +785,11 @@ func renderHTMLToText(htmlBody []byte, inline map[string]string, h1Style, h2Styl
 	}
 
 	return result, placements, nil
+}
+
+func isRemoteImageURL(src string) bool {
+	src = strings.ToLower(src)
+	return strings.HasPrefix(src, "http://") || strings.HasPrefix(src, "https://")
 }
 
 func tableHeaderStyle() lipgloss.Style {
@@ -1026,7 +942,7 @@ func styleQuotedReplies(text string) string {
 		}
 
 		// Check if line starts with ">" (quoted text)
-		if strings.HasPrefix(trimmedLine, ">") {
+		if strings.HasPrefix(trimmedLine, ">") { //nolint:gocritic
 			if !inQuote {
 				// Start a new quote block without header info
 				inQuote = true
@@ -1039,7 +955,7 @@ func styleQuotedReplies(text string) string {
 			quoteBlock = append(quoteBlock, quotedContent)
 		} else if inQuote {
 			// End of quote block - check if it's just whitespace
-			if trimmedLine == "" && i+1 < len(lines) && strings.HasPrefix(strings.TrimSpace(lines[i+1]), ">") {
+			if trimmedLine == "" && i+1 < len(lines) && strings.HasPrefix(strings.TrimSpace(lines[i+1]), ">") { //nolint:gocritic
 				// Empty line within quote block, keep it
 				quoteBlock = append(quoteBlock, "")
 			} else if trimmedLine == "" && len(quoteBlock) == 0 {
@@ -1102,11 +1018,12 @@ func renderQuoteBox(from, date string, lines []string) string {
 	// Build header with email on left and date on right
 	var header string
 	if from != "" || date != "" {
-		if from != "" && date != "" {
+		switch {
+		case from != "" && date != "":
 			header = quoteHeaderStyle().Render(from + "  " + date)
-		} else if from != "" {
+		case from != "":
 			header = quoteHeaderStyle().Render(from)
-		} else {
+		default:
 			header = quoteHeaderStyle().Render(date)
 		}
 	}

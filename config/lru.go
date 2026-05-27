@@ -41,7 +41,6 @@ func GetLRUInstance(threshold int) *LRU {
 			if err := lru.LoadFromDisk(); err != nil {
 				log.Printf("Failed to load LRU from disk: %v\n", err)
 			}
-
 		})
 
 	lru.mu.Lock()
@@ -65,12 +64,12 @@ func removeBodyFromDisk(folder string, uid uint32, accountID string) error {
 	cache, err := LoadEmailBodyCache(folder)
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	kept := cache.Bodies[:0]
 	for _, b := range cache.Bodies {
-		if !(b.UID == uid && b.AccountID == accountID) {
+		if b.UID != uid || b.AccountID != accountID {
 			kept = append(kept, b)
 		}
 	}
@@ -214,7 +213,7 @@ func saveEmailBodyToDisk(folder string, body *CachedEmailBody) error {
 	return saveEmailBodyCache(cache)
 }
 
-func (lru *LRU) Get(folder string, uid uint32, accountID string) *Node {
+func (lru *LRU) Get(folder string, uid uint32, accountID string) *CachedEmailBody {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 
@@ -233,7 +232,9 @@ func (lru *LRU) Get(folder string, uid uint32, accountID string) *Node {
 
 	_ = saveEmailBodyToDisk(folder, node.Body)
 
-	return node
+	bodyCopy := *node.Body
+
+	return &bodyCopy
 }
 
 func (lru *LRU) removeKey(key string) {

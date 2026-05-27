@@ -10,39 +10,24 @@ import (
 )
 
 type generalOption struct {
-	labelKey     string
-	value        string
-	tip          string
-	isAccountSig bool
-	accountID    string
+	labelKey string
+	value    string
+	tip      string
 }
 
 func (m *Settings) buildGeneralOptions() []generalOption {
 	opts := []generalOption{
-		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, ""},
-		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, ""},
-		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, ""},
-		{"settings_general.enable_split_pane", onOff(m.cfg.EnableSplitPane), "View inbox and email side-by-side.", false, ""},
-		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, ""},
-		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, ""},
-		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, ""},
-		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, ""},
-		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, ""},
-	}
-
-	for _, acc := range m.cfg.Accounts {
-		status := t("settings_general.signature_not_configured")
-		accCopy := acc // capture for pointer safety
-		if config.HasAccountSignature(&accCopy) {
-			status = t("settings_general.signature_configured")
-		}
-		opts = append(opts, generalOption{
-			labelKey:     fmt.Sprintf("Signature (%s)", acc.Email),
-			value:        status,
-			tip:          fmt.Sprintf("Configure the signature for %s", acc.Email),
-			isAccountSig: true,
-			accountID:    acc.ID,
-		})
+		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails."},
+		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen."},
+		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail."},
+		{"settings_general.enable_split_pane", onOff(m.cfg.EnableSplitPane), "View inbox and email side-by-side."},
+		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept."},
+		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates."},
+		{"settings_general.spellcheck", onOff(!m.cfg.DisableSpellcheck), "Underline misspelled words while composing."},
+		{"settings_general.spell_suggestions", onOff(!m.cfg.DisableSpellSuggestions), "Show suggestion popup for misspelled words."},
+		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed."},
+		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly."},
+		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails."},
 	}
 
 	return opts
@@ -54,18 +39,10 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "up", "k":
 		m.generalCursor = (m.generalCursor - 1 + len(opts)) % len(opts)
-	case "down", "j":
+	case keyDown, "j":
 		m.generalCursor = (m.generalCursor + 1) % len(opts)
-	case "enter", "space", "right", "l":
+	case keyEnter, "space", keyRight, "l":
 		if m.generalCursor < len(opts) {
-			opt := opts[m.generalCursor]
-			if opt.isAccountSig {
-				if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
-					return m, func() tea.Msg { return GoToSignatureEditorMsg{AccountID: opt.accountID} }
-				}
-				return m, nil
-			}
-
 			saved := false
 			switch m.generalCursor {
 			case 0: // Image Display
@@ -92,7 +69,15 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				m.cfg.EnableDetailedDates = !m.cfg.EnableDetailedDates
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 6: // Date Format
+			case 6: // Spellcheck
+				m.cfg.DisableSpellcheck = !m.cfg.DisableSpellcheck
+				_ = config.SaveConfig(m.cfg)
+				saved = true
+			case 7: // Spell Suggestions
+				m.cfg.DisableSpellSuggestions = !m.cfg.DisableSpellSuggestions
+				_ = config.SaveConfig(m.cfg)
+				saved = true
+			case 8: // Date Format
 				switch m.cfg.DateFormat {
 				case config.DateFormatEU:
 					m.cfg.DateFormat = config.DateFormatUS
@@ -103,7 +88,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 7: // Language
+			case 9: // Language
 				// Cycle through available languages
 				langs := i18n.LanguageCodes()
 				currentLang := m.cfg.GetLanguage()
@@ -118,14 +103,14 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				m.cfg.Language = langs[nextIdx]
 				_ = config.SaveConfig(m.cfg)
 				// Apply language change immediately
-				i18n.GetManager().SetLanguage(m.cfg.Language)
+				i18n.GetManager().SetLanguage(m.cfg.Language) //nolint:errcheck,gosec
 				// Trigger full UI rebuild
 				return m, tea.Batch(
 					func() tea.Msg { return ConfigSavedMsg{} },
 					func() tea.Msg { return LanguageChangedMsg{} },
 				)
-			case 8: // Edit Signature
-				if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
+			case 10: // Edit Signature
+				if msg.String() == keyEnter || msg.String() == keyRight || msg.String() == "l" {
 					return m, func() tea.Msg { return GoToSignatureEditorMsg{} }
 				}
 			}
@@ -152,12 +137,9 @@ func (m *Settings) viewGeneral() string {
 			style = selectedAccountItemStyle
 		}
 
-		label := opt.labelKey
-		if !opt.isAccountSig {
-			label = t(opt.labelKey)
-		}
+		label := t(opt.labelKey)
 		text := fmt.Sprintf("%s: %s", label, opt.value)
-		if opt.labelKey == "settings_general.signature" || opt.isAccountSig {
+		if opt.labelKey == "settings_general.signature" {
 			text = fmt.Sprintf("%s (%s)", label, opt.value)
 		}
 
