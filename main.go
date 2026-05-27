@@ -157,7 +157,7 @@ func newInitialModel(cfg *config.Config, mailtoURL *url.URL) *mainModel {
 			}
 			subject := mailtoURL.Query().Get("subject")
 			body := mailtoURL.Query().Get("body")
-			composer := tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips)
+			composer := tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips, cfg.EnableEnhancedComposerExit)
 			composer.SetSpellcheckOptions(cfg.DisableSpellcheck, cfg.DisableSpellSuggestions)
 			initialModel.current = composer
 		} else {
@@ -546,6 +546,9 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 		}
 		m.folderInbox = tui.NewFolderInbox(cachedFolders, m.config.Accounts)
 		m.folderInbox.SetUnreadCounts(unread)
+		m.folderInbox.SetLayout(m.config.Layout)
+		m.folderInbox.SetSplitActive(m.config.SplitActive)
+		m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
 		m.folderInbox.SetDateFormat(m.config.GetDateFormat())
 		m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 		m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
@@ -1104,9 +1107,9 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 		var composer *tui.Composer
 		if m.config != nil && len(m.config.Accounts) > 0 {
 			firstAccount := m.config.GetFirstAccount()
-			composer = tui.NewComposerWithAccounts(m.config.Accounts, firstAccount.ID, msg.To, msg.Subject, msg.Body, hideTips)
+			composer = tui.NewComposerWithAccounts(m.config.Accounts, firstAccount.ID, msg.To, msg.Subject, msg.Body, hideTips, m.config.EnableEnhancedComposerExit)
 		} else {
-			composer = tui.NewComposer("", msg.To, msg.Subject, msg.Body, hideTips)
+			composer = tui.NewComposer("", msg.To, msg.Subject, msg.Body, hideTips, m.config.EnableEnhancedComposerExit)
 		}
 		m.applySpellcheckOptions(composer)
 		m.current = composer
@@ -1127,7 +1130,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 			accounts = m.config.Accounts
 			hideTips = m.config.HideTips
 		}
-		composer := tui.NewComposerFromDraft(msg.Draft, accounts, hideTips)
+		composer := tui.NewComposerFromDraft(msg.Draft, accounts, hideTips, m.config.EnableEnhancedComposerExit)
 		m.applySpellcheckOptions(composer)
 		m.current = composer
 		m.current, _ = m.current.Update(m.currentWindowSize())
@@ -1156,10 +1159,25 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 			}
 		}
 		if m.folderInbox != nil {
+			m.folderInbox.SetLayout(m.config.Layout)
+			m.folderInbox.SetSplitActive(m.config.SplitActive)
+			m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
 			m.folderInbox.SetDateFormat(m.config.GetDateFormat())
+
 			m.folderInbox.SetDetailedDates(m.config.EnableDetailedDates)
 			m.folderInbox.SetDefaultThreaded(m.config.EnableThreaded)
 			m.folderInbox.SetDisableImages(m.config.DisableImages)
+		}
+		return m, nil
+
+	case tui.ToggleLayoutMsg:
+		m.config.SplitActive = !m.config.SplitActive
+		if err := config.SaveConfig(m.config); err != nil {
+			log.Printf("save config: %v", err)
+		}
+		if m.folderInbox != nil {
+			m.folderInbox.SetSplitActive(m.config.SplitActive)
+			m.folderInbox.SetEnableQuickToggle(m.config.EnableQuickToggle)
 		}
 		return m, nil
 
@@ -1301,7 +1319,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 				}
 				subject := m.mailtoURL.Query().Get("subject")
 				body := m.mailtoURL.Query().Get("body")
-				composer := tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips)
+				composer := tui.NewComposerWithAccounts(cfg.Accounts, cfg.Accounts[0].ID, to, subject, body, cfg.HideTips, cfg.EnableEnhancedComposerExit)
 				m.applySpellcheckOptions(composer)
 				m.current = composer
 			} else {
@@ -1538,7 +1556,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 			if accountID == "" {
 				accountID = m.config.GetFirstAccount().ID
 			}
-			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, to, subject, "", hideTips)
+			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, to, subject, "", hideTips, m.config.EnableEnhancedComposerExit)
 			// For catch-all accounts, pre-fill From with the specific address the email was delivered to.
 			if len(msg.Email.To) > 0 {
 				for i := range m.config.Accounts {
@@ -1558,7 +1576,7 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 				}
 			}
 		} else {
-			composer = tui.NewComposer("", to, subject, "", hideTips)
+			composer = tui.NewComposer("", to, subject, "", hideTips, m.config.EnableEnhancedComposerExit)
 		}
 		composer.SetQuotedText(quotedText)
 
@@ -1599,9 +1617,9 @@ func (m *mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) { //nolint:gocyclo
 			if accountID == "" {
 				accountID = m.config.GetFirstAccount().ID
 			}
-			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, "", subject, body, hideTips)
+			composer = tui.NewComposerWithAccounts(m.config.Accounts, accountID, "", subject, body, hideTips, m.config.EnableEnhancedComposerExit)
 		} else {
-			composer = tui.NewComposer("", "", subject, body, hideTips)
+			composer = tui.NewComposer("", "", subject, body, hideTips, m.config.EnableEnhancedComposerExit)
 		}
 
 		m.applySpellcheckOptions(composer)

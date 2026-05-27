@@ -47,7 +47,8 @@
     "prev_folder": "shift+tab",
     "move": "m",
     "focus_preview": "]",
-    "focus_inbox": "["
+    "focus_inbox": "[",
+    "toggle_layout": "L"
   },
   "drafts": {
     "open": "enter",

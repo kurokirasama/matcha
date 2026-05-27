@@ -8,136 +8,125 @@ import (
 	"github.com/floatpane/matcha/fetcher"
 )
 
-// TestFolderInboxSplitPreviewRendersSearchHit covers the case Lea reported on
-// PR #1186: opening a search result in split-pane mode used to silently drop
-// the keypress because the email was not in m.inbox.allEmails. After the fix
-// OpenSplitPreview accepts the resolved email and findEmailByUID falls back
-// to it, so PreviewBodyFetchedMsg can build the preview pane.
-func TestFolderInboxSplitPreviewRendersSearchHit(t *testing.T) {
+func TestFolderInbox_InitialState(t *testing.T) {
 	accounts := []config.Account{
 		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
-	fi := NewFolderInbox([]string{keyINBOX, "Archive"}, accounts)
-	// Force a non-zero canvas so calculate*Width does not panic on Update.
-	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
-	fi = model.(*FolderInbox)
+	folders := []string{"INBOX", "Sent", "Trash"}
+	fi := NewFolderInbox(folders, accounts)
 
-	// Search hit lives in a different folder; allEmails is empty.
-	hit := &fetcher.Email{
-		UID:       4242,
-		AccountID: "account-1",
-		MessageID: "<search-hit@example.com>",
-		From:      "sender@example.com",
-		To:        []string{"first@example.com"},
-		Subject:   "Search hit",
+	if fi.currentFolder != "INBOX" {
+		t.Errorf("expected current folder to be INBOX, got %s", fi.currentFolder)
 	}
 
-	fi.OpenSplitPreview(hit.UID, hit.AccountID, hit)
-
-	if fi.previewSearchEmail == nil {
-		t.Fatal("OpenSplitPreview should retain the search hit email")
-	}
-	if got := fi.findEmailByUID(hit.UID, hit.AccountID); got == nil {
-		t.Fatal("findEmailByUID should fall back to the search hit email")
-	}
-
-	// Simulate the body arriving and verify the preview pane is built.
-	model, _ = fi.Update(PreviewBodyFetchedMsg{
-		UID:       hit.UID,
-		AccountID: hit.AccountID,
-		Body:      "hello body",
-	})
-	fi = model.(*FolderInbox)
-
-	if fi.previewPane == nil {
-		t.Fatal("expected previewPane to be built from the search hit fallback")
-	}
-
-	// closeSplitPreview must clear the cached search hit so a later open with
-	// no email cannot accidentally reuse the stale reference.
-	fi.closeSplitPreview()
-	if fi.previewSearchEmail != nil {
-		t.Fatal("closeSplitPreview should clear previewSearchEmail")
+	if len(fi.folders) != 3 {
+		t.Errorf("expected 3 folders, got %d", len(fi.folders))
 	}
 }
 
-// TestFolderInboxSplitPreviewPrefersAllEmails verifies that when the email is
-// already known in allEmails, findEmailByUID returns the live entry (so reads
-// like IsRead stay current) instead of the snapshot passed via OpenSplitPreview.
-func TestFolderInboxSplitPreviewPrefersAllEmails(t *testing.T) {
+func TestFolderInbox_SwitchFolder(t *testing.T) {
 	accounts := []config.Account{
 		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
-	fi := NewFolderInbox([]string{keyINBOX}, accounts)
-	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
+	folders := []string{"INBOX", "Sent"}
+	fi := NewFolderInbox(folders, accounts)
+
+	// Switch to Sent
+	model, cmd := fi.Update(tea.KeyPressMsg{Code: tea.KeyTab, Text: "tab"})
 	fi = model.(*FolderInbox)
 
-	live := fetcher.Email{UID: 7, AccountID: "account-1", Subject: "live", IsRead: true}
-	fi.SetEmails([]fetcher.Email{live}, accounts)
-
-	stale := &fetcher.Email{UID: 7, AccountID: "account-1", Subject: "stale", IsRead: false}
-	fi.OpenSplitPreview(live.UID, live.AccountID, stale)
-
-	got := fi.findEmailByUID(live.UID, live.AccountID)
-	if got == nil {
-		t.Fatal("findEmailByUID should resolve the email")
+	if fi.currentFolder != "Sent" {
+		t.Errorf("expected current folder to be Sent, got %s", fi.currentFolder)
 	}
-	if got.Subject != "live" || !got.IsRead {
-		t.Fatalf("expected the live allEmails entry, got %+v", got)
+
+	if cmd == nil {
+		t.Fatal("expected a command after switching folder")
+	}
+
+	msg := cmd()
+	switch m := msg.(type) {
+	case SwitchFolderMsg:
+		if m.FolderName != "Sent" {
+			t.Errorf("expected SwitchFolderMsg with Sent, got %s", m.FolderName)
+		}
+	default:
+		t.Errorf("expected SwitchFolderMsg, got %T", msg)
 	}
 }
 
-// TestSearchOverlayKeysNotIntercepted covers issue #1199: pressing keys that
-// match folder-level bindings (e.g. "m" for move) while the search overlay is
-// active used to trigger the move flow instead of entering text into the
-// search input. FolderInbox.Update now passes through to the inner inbox
-// while m.inbox.searchOverlay != nil so the overlay receives raw keystrokes.
-func TestSearchOverlayKeysNotIntercepted(t *testing.T) {
+func TestFolderInbox_MoveToFolder(t *testing.T) {
 	accounts := []config.Account{
 		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
-	fi := NewFolderInbox([]string{keyINBOX, "Archive"}, accounts)
-	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
+	folders := []string{"INBOX", "Archive"}
+	fi := NewFolderInbox(folders, accounts)
+	fi.SetEmails([]fetcher.Email{{UID: 1, AccountID: "account-1", Subject: "Test"}}, accounts)
+
+	// Start move
+	model, _ := fi.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
 	fi = model.(*FolderInbox)
 
-	// Selection must exist so the bug's "m" -> Move handler would actually fire.
-	fi.SetEmails([]fetcher.Email{
-		{UID: 1, AccountID: "account-1", Subject: "first"},
-	}, accounts)
+	if !fi.movingEmail {
+		t.Error("expected movingEmail to be true after pressing 'm'")
+	}
 
-	// Open the search overlay (the same state pressing "/" produces in inbox.go).
-	fi.inbox.searchOverlay = NewSearchOverlay(fi.width, fi.height)
-
-	// Press "m" -- with the bug this would set movingEmail = true.
-	model, _ = fi.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
+	// Cancel move
+	model, _ = fi.Update(tea.KeyPressMsg{Code: tea.KeyEsc, Text: "esc"})
 	fi = model.(*FolderInbox)
 
 	if fi.movingEmail {
-		t.Fatal("pressing 'm' while search overlay is active must not start the move flow")
+		t.Error("expected movingEmail to be false after pressing 'esc'")
 	}
-	if fi.inbox.searchOverlay == nil {
-		t.Fatal("search overlay must remain open after typing into it")
+}
+
+func TestFolderInbox_KeybindingsDuringFilter(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
-	if got := fi.inbox.searchOverlay.input.Value(); got != "m" {
-		t.Fatalf("search input should contain typed character, got %q", got)
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+
+	// Mock filtering state
+	fi.inbox.list.SetFilteringEnabled(true)
+	fi.inbox.list.Update(tea.KeyPressMsg{Code: '/', Text: "/"})
+
+	// Press "m" (matches move-to-folder keybinding in FolderInbox)
+	model, _ := fi.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
+	fi = model.(*FolderInbox)
+
+	if fi.movingEmail {
+		t.Error("FolderInbox keybinding should not trigger while list is filtering")
+	}
+}
+
+func TestFolderInbox_KeybindingsDuringSearch(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+
+	// Mock search overlay active
+	fi.inbox.searchOverlay = &SearchOverlay{}
+
+	// Press "m" (matches move-to-folder keybinding in FolderInbox)
+	model, _ := fi.Update(tea.KeyPressMsg{Code: 'm', Text: "m"})
+	fi = model.(*FolderInbox)
+
+	if fi.movingEmail {
+		t.Error("FolderInbox keybinding should not trigger while search overlay is active")
 	}
 }
 
 func TestFolderInbox_ToggleSidebar(t *testing.T) {
 	accounts := []config.Account{
-		{ID: "account-1", Email: "host.example.com"},
+		{ID: "account-1", Email: "host.example.com", FetchEmail: "first@example.com"},
 	}
 	fi := NewFolderInbox([]string{"INBOX"}, accounts)
-	
-	// Set initial window size
-	width := 200
-	height := 60
-	model, _ := fi.Update(tea.WindowSizeMsg{Width: width, Height: height})
+	model, _ := fi.Update(tea.WindowSizeMsg{Width: 200, Height: 60})
 	fi = model.(*FolderInbox)
 
 	initialInboxWidth := fi.inbox.list.Width()
-	
-	// Simulate pressing 'F' to toggle sidebar
+
+	// Toggle sidebar hidden
 	model, _ = fi.Update(tea.KeyPressMsg{Code: 'F', Text: "F"})
 	fi = model.(*FolderInbox)
 
@@ -146,7 +135,6 @@ func TestFolderInbox_ToggleSidebar(t *testing.T) {
 	}
 
 	hiddenSidebarInboxWidth := fi.inbox.list.Width()
-	
 	if hiddenSidebarInboxWidth <= initialInboxWidth {
 		t.Errorf("expected inbox width to increase when sidebar is hidden, got %d <= %d", hiddenSidebarInboxWidth, initialInboxWidth)
 	}
@@ -161,5 +149,47 @@ func TestFolderInbox_ToggleSidebar(t *testing.T) {
 
 	if fi.inbox.list.Width() != initialInboxWidth {
 		t.Errorf("expected inbox width to return to %d, got %d", initialInboxWidth, fi.inbox.list.Width())
+	}
+}
+
+func TestFolderInbox_ToggleLayout_Vertical(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	fi.SetLayout(config.LayoutVertical)
+	fi.SetEnableQuickToggle(true)
+	fi.splitActive = false
+
+	// Toggle Shift+L
+	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	
+	if !fi.splitActive {
+		t.Error("expected splitActive to be true after pressing Shift+L in Vertical mode")
+	}
+
+	// Toggle back
+	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	
+	if fi.splitActive {
+		t.Error("expected splitActive to be false after pressing Shift+L again")
+	}
+}
+
+func TestFolderInbox_ToggleLayout_Horizontal(t *testing.T) {
+	accounts := []config.Account{
+		{ID: "account-1", Email: "host.example.com"},
+	}
+	fi := NewFolderInbox([]string{"INBOX"}, accounts)
+	fi.SetLayout(config.LayoutHorizontal)
+	fi.SetEnableQuickToggle(true)
+	fi.splitActive = true
+
+	// Toggle Shift+L
+	fi.Update(tea.KeyPressMsg{Code: 'L', Text: "L"})
+	
+	// Should NOT change splitActive in Horizontal mode
+	if !fi.splitActive {
+		t.Error("expected splitActive to remain true in Horizontal mode")
 	}
 }

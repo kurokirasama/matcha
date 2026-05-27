@@ -12,7 +12,7 @@ import (
 )
 
 func TestMailingListSuggestionTruncates(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 	composer.width = 60
 
 	addresses := make([]string, 20)
@@ -55,7 +55,7 @@ func TestNormalizeEmailList(t *testing.T) {
 }
 
 func TestComposerEmailValidationOnFieldBlur(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 	composer.toInput.SetValue("not-an-email")
 
 	model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyTab})
@@ -91,7 +91,7 @@ func TestComposerFromValidationOnFieldBlur(t *testing.T) {
 			accounts := []config.Account{
 				{ID: "account-1", Email: "user@example.org", CatchAll: true},
 			}
-			composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+			composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 			composer.focusIndex = focusFrom
 			composer.fromInput.Focus()
 			composer.fromInput.SetValue(tt.from)
@@ -116,7 +116,7 @@ func TestComposerFromValidationOnFieldBlur(t *testing.T) {
 }
 
 func TestComposerEmailValidationClearsWhenTyping(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 	composer.toInput.SetValue("not-an-email")
 
 	model, _ := composer.Update(tea.KeyPressMsg{Code: tea.KeyTab})
@@ -168,10 +168,10 @@ func TestComposerSendValidatesEmailFields(t *testing.T) {
 				accounts := []config.Account{
 					{ID: "account-1", Email: "user@example.org", CatchAll: true},
 				}
-				composer = NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+				composer = NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 				composer.fromInput.SetValue(tt.catchAllFrom)
 			} else {
-				composer = NewComposer("", "", "", "", false)
+				composer = NewComposer("", "", "", "", false, false)
 			}
 			composer.toInput.SetValue(tt.to)
 			composer.ccInput.SetValue(tt.cc)
@@ -212,7 +212,7 @@ func TestComposerSendValidatesEmailFields(t *testing.T) {
 }
 
 func TestComposerContactSuggestionUsesDisplayName(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 	composer.showSuggestions = true
 	composer.suggestions = []config.Contact{{
 		Name:  "Alice Example",
@@ -233,7 +233,7 @@ func TestComposerUpdate(t *testing.T) {
 	accounts := []config.Account{
 		{ID: "account-1", Email: "test@example.com", Name: "Test User"},
 	}
-	composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+	composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 	t.Run("Focus cycling", func(t *testing.T) {
 		// Initial focus is on the 'To' input (index 1, since From is 0).
@@ -309,7 +309,7 @@ func TestComposerUpdate(t *testing.T) {
 
 	t.Run("Send email message", func(t *testing.T) {
 		// Re-initialize composer for this test
-		composer = NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+		composer = NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 		// Set values for the email fields.
 		composer.toInput.SetValue("recipient@example.com")
@@ -351,7 +351,7 @@ func TestComposerUpdate(t *testing.T) {
 			{ID: "account-1", Email: "test1@example.com", Name: "User 1"},
 			{ID: "account-2", Email: "test2@example.com", Name: "User 2"},
 		}
-		multiComposer := NewComposerWithAccounts(multiAccounts, "account-1", "", "", "", false)
+		multiComposer := NewComposerWithAccounts(multiAccounts, "account-1", "", "", "", false, false)
 
 		// Move focus to From field
 		multiComposer.focusIndex = focusFrom
@@ -390,7 +390,7 @@ func TestComposerUpdate(t *testing.T) {
 		singleAccounts := []config.Account{
 			{ID: "account-1", Email: "test@example.com"},
 		}
-		singleComposer := NewComposerWithAccounts(singleAccounts, "account-1", "", "", "", false)
+		singleComposer := NewComposerWithAccounts(singleAccounts, "account-1", "", "", "", false, false)
 
 		// Move focus to From field
 		singleComposer.focusIndex = focusFrom
@@ -409,7 +409,7 @@ func TestComposerUpdate(t *testing.T) {
 			{ID: "account-1", Email: "test1@example.com"},
 			{ID: "account-2", Email: "test2@example.com"},
 		}
-		multiComposer := NewComposerWithAccounts(multiAccounts, "account-1", "", "", "", false)
+		multiComposer := NewComposerWithAccounts(multiAccounts, "account-1", "", "", "", false, false)
 
 		// Initial focus is on 'To' field
 		if multiComposer.focusIndex != focusTo {
@@ -468,7 +468,7 @@ func TestFormatAttachmentNameMissingFile(t *testing.T) {
 }
 
 func TestComposerAttachmentSelectionAndRemoval(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 	composer.focusIndex = focusAttachment
 	composer.attachmentPaths = []string{"/tmp/a.txt", "/tmp/b.txt", "/tmp/c.txt"}
 	composer.attachmentNames = map[string]string{
@@ -515,7 +515,7 @@ func TestComposerGetFromAddress(t *testing.T) {
 		accounts := []config.Account{
 			{ID: "account-1", FetchEmail: "test@example.com", Name: "Test User"},
 		}
-		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 		fromAddr := composer.getFromAddress()
 		expected := "Test User <test@example.com>"
@@ -528,7 +528,7 @@ func TestComposerGetFromAddress(t *testing.T) {
 		accounts := []config.Account{
 			{ID: "account-1", FetchEmail: "test@example.com"},
 		}
-		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 		fromAddr := composer.getFromAddress()
 		expected := "test@example.com"
@@ -541,7 +541,7 @@ func TestComposerGetFromAddress(t *testing.T) {
 		accounts := []config.Account{
 			{ID: "account-1", FetchEmail: "gmail@gmail.com", SendAsEmail: "alias@example.com", Name: "Test User"},
 		}
-		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+		composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 		fromAddr := composer.getFromAddress()
 		expected := "Test User <alias@example.com>"
@@ -551,7 +551,7 @@ func TestComposerGetFromAddress(t *testing.T) {
 	})
 
 	t.Run("No accounts", func(t *testing.T) {
-		composer := NewComposer("", "", "", "", false)
+		composer := NewComposer("", "", "", "", false, false)
 
 		fromAddr := composer.getFromAddress()
 		if fromAddr != "" {
@@ -567,7 +567,7 @@ func TestComposerSetSelectedAccount(t *testing.T) {
 		{ID: "account-2", FetchEmail: "test2@example.com"},
 		{ID: "account-3", FetchEmail: "test3@example.com"},
 	}
-	composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false)
+	composer := NewComposerWithAccounts(accounts, "account-1", "", "", "", false, false)
 
 	composer.SetSelectedAccount("account-3")
 	if composer.selectedAccountIdx != 2 {
@@ -586,7 +586,7 @@ func TestComposerSetSelectedAccount(t *testing.T) {
 
 // TestComposerDynamicHeight verifies that window resize updates textarea heights.
 func TestComposerDynamicHeight(t *testing.T) {
-	composer := NewComposer("", "", "", "", false)
+	composer := NewComposer("", "", "", "", false, false)
 
 	model, _ := composer.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
 	composer = model.(*Composer)

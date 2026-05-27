@@ -38,6 +38,15 @@ const (
 	DateFormatEU  = "DD/MM/YYYY HH:MM"
 )
 
+// LayoutMode defines the orientation of the email preview pane.
+type LayoutMode string
+
+const (
+	LayoutOff        LayoutMode = "off"
+	LayoutVertical   LayoutMode = "vertical"
+	LayoutHorizontal LayoutMode = "horizontal"
+)
+
 type SessionCache struct {
 	once  sync.Once
 	cache tls.ClientSessionCache
@@ -106,10 +115,15 @@ type Config struct {
 	Accounts                []Account     `json:"accounts"`
 	DisableImages           bool          `json:"disable_images,omitempty"`
 	HideTips                bool          `json:"hide_tips,omitempty"`
+	Layout                  LayoutMode    `json:"layout,omitempty"`
+	EnableQuickToggle       bool          `json:"enable_quick_toggle,omitempty"`
+	SplitActive             bool          `json:"split_active,omitempty"`
 	DisableNotifications    bool          `json:"disable_notifications,omitempty"`
 	EnableSplitPane         bool          `json:"enable_split_pane,omitempty"`
 	EnableThreaded          bool          `json:"enable_threaded,omitempty"`
 	EnableDetailedDates     bool          `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool        `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds  bool          `json:"enable_main_menu_keybinds,omitempty"`
 	DisableSpellcheck       bool          `json:"disable_spellcheck,omitempty"`
 	DisableSpellSuggestions bool          `json:"disable_spell_suggestions,omitempty"`
 	Theme                   string        `json:"theme,omitempty"`
@@ -117,6 +131,7 @@ type Config struct {
 	DateFormat              string        `json:"date_format,omitempty"`
 	Language                string        `json:"language,omitempty"` // Language code (e.g., "en", "es", "de")
 	BodyCacheThresholdMB    int           `json:"body_cache_threshold_mb,omitempty"`
+
 	// PluginSettings stores user-configurable values for installed plugins,
 	// keyed by plugin name then setting key. Values are JSON-native types
 	// (bool, float64, string) matching the plugin's declared schema.
@@ -429,10 +444,15 @@ type secureDiskConfig struct {
 	Accounts                []secureDiskAccount               `json:"accounts"`
 	DisableImages           bool                              `json:"disable_images,omitempty"`
 	HideTips                bool                              `json:"hide_tips,omitempty"`
+	Layout                  LayoutMode                        `json:"layout,omitempty"`
+	EnableQuickToggle       bool                              `json:"enable_quick_toggle,omitempty"`
+	SplitActive             bool                              `json:"split_active,omitempty"`
 	DisableNotifications    bool                              `json:"disable_notifications,omitempty"`
 	EnableSplitPane         bool                              `json:"enable_split_pane,omitempty"`
 	EnableThreaded          bool                              `json:"enable_threaded,omitempty"`
 	EnableDetailedDates     bool                              `json:"enable_detailed_dates,omitempty"`
+	EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
+	EnableMainMenuKeybinds  bool                              `json:"enable_main_menu_keybinds,omitempty"`
 	DisableSpellcheck       bool                              `json:"disable_spellcheck,omitempty"`
 	DisableSpellSuggestions bool                              `json:"disable_spell_suggestions,omitempty"`
 	Theme                   string                            `json:"theme,omitempty"`
@@ -477,18 +497,23 @@ func SaveConfig(config *Config) error {
 	if secureMode {
 		// In secure mode, include passwords in the JSON (they'll be encrypted on disk)
 		sdc := secureDiskConfig{
-			DisableImages:           config.DisableImages,
-			HideTips:                config.HideTips,
-			DisableNotifications:    config.DisableNotifications,
-			EnableSplitPane:         config.EnableSplitPane,
-			EnableThreaded:          config.EnableThreaded,
-			EnableDetailedDates:     config.EnableDetailedDates,
-			DisableSpellcheck:       config.DisableSpellcheck,
-			DisableSpellSuggestions: config.DisableSpellSuggestions,
-			Theme:                   config.Theme,
-			MailingLists:            config.MailingLists,
-			DateFormat:              config.DateFormat,
-			PluginSettings:          config.PluginSettings,
+			DisableImages:        config.DisableImages,
+			HideTips:             config.HideTips,
+			Layout:               config.Layout,
+			EnableQuickToggle:    config.EnableQuickToggle,
+			SplitActive:          config.SplitActive,
+			DisableNotifications: config.DisableNotifications,
+			EnableSplitPane:      config.EnableSplitPane,
+			EnableThreaded:       config.EnableThreaded,
+			EnableDetailedDates:  config.EnableDetailedDates,
+			EnableEnhancedComposerExit: config.EnableEnhancedComposerExit,
+			EnableMainMenuKeybinds:     config.EnableMainMenuKeybinds,
+			DisableSpellcheck:          config.DisableSpellcheck,
+			DisableSpellSuggestions:    config.DisableSpellSuggestions,
+			Theme:                      config.Theme,
+			MailingLists:               config.MailingLists,
+			DateFormat:                 config.DateFormat,
+			PluginSettings:             config.PluginSettings,
 		}
 		for _, acc := range config.Accounts {
 			sdc.Accounts = append(sdc.Accounts, secureDiskAccount{
@@ -585,10 +610,15 @@ func LoadConfig() (*Config, error) {
 		Accounts                []rawAccount                      `json:"accounts"`
 		DisableImages           bool                              `json:"disable_images,omitempty"`
 		HideTips                bool                              `json:"hide_tips,omitempty"`
+		Layout                  LayoutMode                        `json:"layout,omitempty"`
+		EnableQuickToggle       bool                              `json:"enable_quick_toggle,omitempty"`
+		SplitActive             bool                              `json:"split_active,omitempty"`
 		DisableNotifications    bool                              `json:"disable_notifications,omitempty"`
 		EnableSplitPane         bool                              `json:"enable_split_pane,omitempty"`
 		EnableThreaded          bool                              `json:"enable_threaded,omitempty"`
 		EnableDetailedDates     bool                              `json:"enable_detailed_dates,omitempty"`
+		EnableEnhancedComposerExit bool                            `json:"enable_enhanced_composer_exit,omitempty"`
+		EnableMainMenuKeybinds  bool                              `json:"enable_main_menu_keybinds,omitempty"`
 		DisableSpellcheck       bool                              `json:"disable_spellcheck,omitempty"`
 		DisableSpellSuggestions bool                              `json:"disable_spell_suggestions,omitempty"`
 		Theme                   string                            `json:"theme,omitempty"`
@@ -627,10 +657,15 @@ func LoadConfig() (*Config, error) {
 
 	config.DisableImages = raw.DisableImages
 	config.HideTips = raw.HideTips
+	config.Layout = raw.Layout
+	config.EnableQuickToggle = raw.EnableQuickToggle
+	config.SplitActive = raw.SplitActive
 	config.DisableNotifications = raw.DisableNotifications
 	config.EnableSplitPane = raw.EnableSplitPane
 	config.EnableThreaded = raw.EnableThreaded
 	config.EnableDetailedDates = raw.EnableDetailedDates
+	config.EnableEnhancedComposerExit = raw.EnableEnhancedComposerExit
+	config.EnableMainMenuKeybinds = raw.EnableMainMenuKeybinds
 	config.DisableSpellcheck = raw.DisableSpellcheck
 	config.DisableSpellSuggestions = raw.DisableSpellSuggestions
 	config.Theme = raw.Theme

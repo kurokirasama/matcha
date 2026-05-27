@@ -10,24 +10,58 @@ import (
 )
 
 type generalOption struct {
-	labelKey string
-	value    string
-	tip      string
+	labelKey     string
+	value        string
+	tip          string
+	disabled     bool
+	isAccountSig bool
+	accountID    string
+}
+
+func getLayoutLabel(mode config.LayoutMode) string {
+	switch mode {
+	case config.LayoutOff:
+		return t("settings_general.split_view_off")
+	case config.LayoutVertical:
+		return t("settings_general.split_view_vertical")
+	case config.LayoutHorizontal:
+		return t("settings_general.split_view_horizontal")
+	default:
+		return t("settings_general.split_view_off")
+	}
 }
 
 func (m *Settings) buildGeneralOptions() []generalOption {
 	opts := []generalOption{
-		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails."},
-		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen."},
-		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail."},
-		{"settings_general.enable_split_pane", onOff(m.cfg.EnableSplitPane), "View inbox and email side-by-side."},
-		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept."},
-		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates."},
-		{"settings_general.spellcheck", onOff(!m.cfg.DisableSpellcheck), "Underline misspelled words while composing."},
-		{"settings_general.spell_suggestions", onOff(!m.cfg.DisableSpellSuggestions), "Show suggestion popup for misspelled words."},
-		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed."},
-		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly."},
-		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails."},
+		{"settings_general.disable_images", onOff(m.cfg.DisableImages), "Prevent images from loading automatically in emails.", false, false, ""},
+		{"settings_general.hide_tips", onOff(m.cfg.HideTips), "Hide helpful hints displayed at the bottom of the screen.", false, false, ""},
+		{"settings_general.disable_notifications", onOff(m.cfg.DisableNotifications), "Turn off desktop notifications for new mail.", false, false, ""},
+		{"settings_general.split_view", getLayoutLabel(m.cfg.Layout), "Orientation of the email preview pane.", false, false, ""},
+		{"settings_general.layout_quick_toggle", onOff(m.cfg.EnableQuickToggle), "Enable Shift+L shortcut to cycle layout modes.", m.cfg.Layout == config.LayoutHorizontal, false, ""},
+		{"settings_general.enable_threaded", onOff(m.cfg.EnableThreaded), "Group emails into conversations by reply chain. Per-folder overrides are kept.", false, false, ""},
+		{"settings_general.enable_detailed_dates", onOff(m.cfg.EnableDetailedDates), "Show detailed inbox dates.", false, false, ""},
+		{"settings_general.enable_main_menu_keybinds", onOff(m.cfg.EnableMainMenuKeybinds), "Enable single-key shortcuts (v, c, p, s) on the main screen.", false, false, ""},
+		{"settings_general.enable_enhanced_composer_exit", onOff(m.cfg.EnableEnhancedComposerExit), "Show a rich confirmation dialog with quick keys when exiting the composer.", false, false, ""},
+		{"settings_general.spellcheck", onOff(!m.cfg.DisableSpellcheck), "Underline misspelled words while composing.", false, false, ""},
+		{"settings_general.spell_suggestions", onOff(!m.cfg.DisableSpellSuggestions), "Show suggestion popup for misspelled words.", false, false, ""},
+		{"settings_general.date_format", getDateFormatLabel(m.cfg.DateFormat), "Change how dates and times are displayed.", false, false, ""},
+		{"settings_general.language", getLanguageLabel(m.cfg.GetLanguage()), "Change the interface language. Changes apply instantly.", false, false, ""},
+		{"settings_general.signature", getSignatureStatus(), "Configure the global signature appended to your outgoing emails.", false, false, ""},
+	}
+
+	for _, acc := range m.cfg.Accounts {
+		status := t("settings_general.signature_not_configured")
+		accCopy := acc // capture for pointer safety
+		if config.HasAccountSignature(&accCopy) {
+			status = t("settings_general.signature_configured")
+		}
+		opts = append(opts, generalOption{
+			labelKey:     fmt.Sprintf("Signature (%s)", acc.Email),
+			value:        status,
+			tip:          fmt.Sprintf("Configure the signature for %s", acc.Email),
+			isAccountSig: true,
+			accountID:    acc.ID,
+		})
 	}
 
 	return opts
@@ -57,27 +91,63 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				m.cfg.DisableNotifications = !m.cfg.DisableNotifications
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 3: // Split Pane View
-				m.cfg.EnableSplitPane = !m.cfg.EnableSplitPane
+			case 3: // Split View
+				switch m.cfg.Layout {
+				case config.LayoutOff:
+					m.cfg.Layout = config.LayoutVertical
+					m.cfg.EnableSplitPane = true
+				case config.LayoutVertical:
+					m.cfg.Layout = config.LayoutHorizontal
+					m.cfg.EnableSplitPane = true
+					// Force off quick toggle when entering horizontal
+					m.cfg.EnableQuickToggle = false
+				case config.LayoutHorizontal:
+					m.cfg.Layout = config.LayoutOff
+					m.cfg.EnableSplitPane = false
+				default:
+					m.cfg.Layout = config.LayoutOff
+					m.cfg.EnableSplitPane = false
+				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 4: // Threaded Conversation View
+			case 4: // Layout Quick Toggle
+				if m.cfg.Layout != config.LayoutHorizontal {
+					m.cfg.EnableQuickToggle = !m.cfg.EnableQuickToggle
+					_ = config.SaveConfig(m.cfg)
+					saved = true
+				} else {
+					return m, func() tea.Msg {
+						return PluginNotifyMsg{
+							Message:  t("settings_general.quick_toggle_unavailable_horizontal"),
+							Duration: 2,
+						}
+					}
+				}
+			case 5: // Threaded Conversation View
 				m.cfg.EnableThreaded = !m.cfg.EnableThreaded
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 5: // Detailed Dates
+			case 6: // Detailed Dates
 				m.cfg.EnableDetailedDates = !m.cfg.EnableDetailedDates
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 6: // Spellcheck
+			case 7: // Main Menu Keybinds
+				m.cfg.EnableMainMenuKeybinds = !m.cfg.EnableMainMenuKeybinds
+				_ = config.SaveConfig(m.cfg)
+				saved = true
+			case 8: // Enhanced Composer Exit
+				m.cfg.EnableEnhancedComposerExit = !m.cfg.EnableEnhancedComposerExit
+				_ = config.SaveConfig(m.cfg)
+				saved = true
+			case 9: // Spellcheck
 				m.cfg.DisableSpellcheck = !m.cfg.DisableSpellcheck
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 7: // Spell Suggestions
+			case 10: // Spell Suggestions
 				m.cfg.DisableSpellSuggestions = !m.cfg.DisableSpellSuggestions
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 8: // Date Format
+			case 11: // Date Format
 				switch m.cfg.DateFormat {
 				case config.DateFormatEU:
 					m.cfg.DateFormat = config.DateFormatUS
@@ -88,7 +158,7 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 				}
 				_ = config.SaveConfig(m.cfg)
 				saved = true
-			case 9: // Language
+			case 12: // Language
 				// Cycle through available languages
 				langs := i18n.LanguageCodes()
 				currentLang := m.cfg.GetLanguage()
@@ -109,9 +179,19 @@ func (m *Settings) updateGeneral(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 					func() tea.Msg { return ConfigSavedMsg{} },
 					func() tea.Msg { return LanguageChangedMsg{} },
 				)
-			case 10: // Edit Signature
-				if msg.String() == keyEnter || msg.String() == keyRight || msg.String() == "l" {
+			case 13: // Edit Signature
+				if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
 					return m, func() tea.Msg { return GoToSignatureEditorMsg{} }
+				}
+			default:
+				// Check for per-account signatures
+				opt := opts[m.generalCursor]
+				if opt.isAccountSig {
+					if msg.String() == "enter" || msg.String() == "right" || msg.String() == "l" {
+						return m, func() tea.Msg {
+							return GoToSignatureEditorMsg{AccountID: opt.accountID}
+						}
+					}
 				}
 			}
 			if saved {
@@ -137,10 +217,19 @@ func (m *Settings) viewGeneral() string {
 			style = selectedAccountItemStyle
 		}
 
-		label := t(opt.labelKey)
-		text := fmt.Sprintf("%s: %s", label, opt.value)
-		if opt.labelKey == "settings_general.signature" {
-			text = fmt.Sprintf("%s (%s)", label, opt.value)
+		label := opt.labelKey
+		if !opt.isAccountSig {
+			label = t(opt.labelKey)
+		}
+
+		val := opt.value
+		if opt.disabled {
+			val = fmt.Sprintf("\x1b[90m%s (Disabled)\x1b[m", val)
+		}
+
+		text := fmt.Sprintf("%s: %s", label, val)
+		if opt.labelKey == "settings_general.signature" || opt.isAccountSig {
+			text = fmt.Sprintf("%s (%s)", label, val)
 		}
 
 		b.WriteString(style.Render(cursor+text) + "\n")
