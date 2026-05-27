@@ -39,3 +39,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+- [ ] **Track: Sync upstream and create PR**
+*Link: [./tracks/upstream_pr_20260526/](./tracks/upstream_pr_20260526/)*
